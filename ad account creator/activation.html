@@ -1,0 +1,109 @@
+<!-- activation.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FB Ad Account Creator - Activation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .logo {
+      width: 128px;
+      height: 128px;
+      margin: 0 auto 20px;
+    }
+    
+    .container {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+    
+    .error {
+      color: #f44336;
+      margin-top: 10px;
+    }
+    
+    .success {
+      color: #4CAF50;
+      margin-top: 10px;
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+    }
+    
+    .status.valid {
+      background-color: #e8f5e9;
+      border: 1px solid #a5d6a7;
+    }
+    
+    .status.invalid {
+      background-color: #ffebee;
+      border: 1px solid #ef9a9a;
+    }
+  </style>
+</head>
+<body>
+  <img src="icon128.png" alt="FB Ad Account Creator" class="logo">
+  <h1>FB Ad Account Creator</h1>
+  
+  <div class="container">
+    <div id="license-status">
+      <!-- License status will be displayed here -->
+      <p>Checking license status...</p>
+    </div>
+    
+    <div id="activation-form">
+      <h2>Activate Your License</h2>
+      <div class="form-group">
+        <input type="text" id="license-key" placeholder="Enter your license key" />
+      </div>
+      <button id="activate-button">Activate License</button>
+      <p id="activation-message"></p>
+    </div>
+  </div>
+  
+  <script src="activation.js"></script>
+</body>
+</html>

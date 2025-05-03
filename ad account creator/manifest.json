@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "FB Ad Accounts Creator",
+  "version": "1.0",
+  "description": "Creates Multiple Facebook ad accounts with a single click, created by Growth Lab TeaM.",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_popup": "activation.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "notifications",
+    "storage",
+    "management"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "*://*.facebook.com/*",
+    "*://*.business.facebook.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "facebook-token-extractor.js",
+        "adaccount-creator.js",
+        "icon16.png",
+        "icon48.png",
+        "icon128.png"
+      ],
+      "matches": [
+        "*://*.facebook.com/*",
+        "*://*.business.facebook.com/*"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
