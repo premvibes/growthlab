@@ -1,6 +1,9 @@
 <?php
 header('Content-Type: application/json');
 
+// Set timezone to Indian Standard Time
+date_default_timezone_set('Asia/Kolkata');
+
 // Path to licenses.json file
 $file = 'licenses.json';
 
@@ -43,9 +46,11 @@ if ($action === 'generate') {
 
     // Add new license
     $licenses[$license_key] = [
-        'device_id' => '',
+        'ip' => '',
+        'last_access' => '',
         'expires_at' => $expires_at,
-        'created_at' => date('Y-m-d H:i:s')
+        'created_at' => date('Y-m-d H:i:s'),
+        'status' => 'unused'  // Initial status is unused
     ];
 
     // Save to file
