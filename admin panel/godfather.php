@@ -224,7 +224,6 @@ if (isset($_GET['logout'])) {
       <thead>
         <tr>
           <th>License Key (Click to Copy)</th>
-          <th>Device ID</th>
           <th>Expires At</th>
           <th>Change Validity</th>
           <th>Actions</th>
@@ -288,7 +287,6 @@ function renderLicenses() {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td onclick="copyText('${key}')" style="cursor: pointer;">${key}</td>
-      <td>${info.device_id || 'Not Activated'}</td>
       <td>${formatDate(info.expires_at)}</td>
       <td>
         <select id="validity-${key}">
