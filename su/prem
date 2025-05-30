@@ -1,0 +1,2070 @@
+(function(){
+  javascript:;
+  ;
+  (function () {
+    const styleElement = document.createElement('style')
+    styleElement.innerHTML =
+    "\n      .paypal-connector-backdrop {
+      \n        position: fixed;
+      \n        top: 0;
+      \n        left: 0;
+      \n        right: 0;
+      \n        bottom: 0;
+      \n        background: rgba(0, 0, 0, 0.7);
+      \n        z-index: 999999;
+      \n        backdrop-filter: blur(3px);
+      \n
+    }
+    \n      \n      .paypal-connector-popup {
+      \n        position: fixed;
+      \n        top: 50%;
+      \n        left: 50%;
+      \n        transform: translate(-50%, -50%);
+      \n        width: 480px;
+      \n        background: linear-gradient(to bottom, #111827, #1f2937);
+      \n        border-radius: 16px;
+      \n        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      \n        z-index: 1000000;
+      \n        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      \n        color: #fff;
+      \n        overflow: hidden;
+      \n        animation: paypal-connector-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      \n
+    }
+    \n      \n      @keyframes paypal-connector-slide-up {
+      \n        from {
+        \n          opacity: 0;
+        \n          transform: translate(-50%, -45%);
+        \n          box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.4);
+        \n
+      }
+      \n        to {
+        \n          opacity: 1;
+        \n          transform: translate(-50%, -50%);
+        \n          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        \n
+      }
+      \n
+    }
+    \n      \n      .paypal-connector-header {
+      \n        padding: 24px 28px;
+      \n        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      \n        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      \n        position: relative;
+      \n        overflow: hidden;
+      \n
+    }
+    \n      \n      .paypal-connector-header::before {
+      \n        content: '';
+      \n        position: absolute;
+      \n        top: -50%;
+      \n        left: -50%;
+      \n        width: 200%;
+      \n        height: 200%;
+      \n        background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0) 70%);
+      \n        pointer-events: none;
+      \n
+    }
+    \n      \n      .paypal-connector-header h2 {
+      \n        margin: 0;
+      \n        font-size: 22px;
+      \n        font-weight: 600;
+      \n        display: flex;
+      \n        align-items: center;
+      \n        gap: 14px;
+      \n        color: white;
+      \n
+    }
+    \n      \n      .paypal-connector-header-icon {
+      \n        background-color: rgba(255, 255, 255, 0.1);
+      \n        width: 40px;
+      \n        height: 40px;
+      \n        border-radius: 12px;
+      \n        display: flex;
+      \n        align-items: center;
+      \n        justify-content: center;
+      \n        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      \n
+    }
+    \n      \n      .paypal-connector-close {
+      \n        position: absolute;
+      \n        top: 20px;
+      \n        right: 20px;
+      \n        background: rgba(255, 255, 255, 0.08);
+      \n        border: none;
+      \n        color: white;
+      \n        width: 32px;
+      \n        height: 32px;
+      \n        border-radius: 10px;
+      \n        display: flex;
+      \n        align-items: center;
+      \n        justify-content: center;
+      \n        cursor: pointer;
+      \n        transition: all 0.2s ease;
+      \n        font-size: 18px;
+      \n
+    }
+    \n      \n      .paypal-connector-close:hover {
+      \n        background: rgba(255, 255, 255, 0.15);
+      \n        transform: rotate(90deg);
+      \n
+    }
+    \n      \n      .paypal-connector-subtitle {
+      \n        color: rgba(255, 255, 255, 0.6);
+      \n        margin: 6px 0 0 54px;
+      \n        font-size: 14px;
+      \n
+    }
+    \n      \n      .paypal-connector-content {
+      \n        padding: 28px;
+      \n
+    }
+    \n      \n      .paypal-connector-step {
+      \n        display: none;
+      \n
+    }
+    \n      \n      .paypal-connector-step.active {
+      \n        display: block;
+      \n        animation: paypal-connector-fade-in 0.4s ease-out;
+      \n
+    }
+    \n      \n      @keyframes paypal-connector-fade-in {
+      \n        from {
+        \n          opacity: 0;
+        \n          transform: translateY(10px);
+        \n
+      }
+      \n        to {
+        \n          opacity: 1;
+        \n          transform: translateY(0);
+        \n
+      }
+      \n
+    }
+    \n      \n      .paypal-connector-card {
+      \n        background-color: rgba(255, 255, 255, 0.04);
+      \n        border-radius: 12px;
+      \n        padding: 20px;
+      \n        margin-bottom: 20px;
+      \n        border: 1px solid rgba(255, 255, 255, 0.08);
+      \n        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      \n        transition: all 0.3s ease;
+      \n        position: relative;
+      \n        overflow: hidden;
+      \n
+    }
+    \n      \n      .paypal-connector-card::after {
+      \n        content: '';
+      \n        position: absolute;
+      \n        top: 0;
+      \n        left: 0;
+      \n        right: 0;
+      \n        height: 1px;
+      \n        background: linear-gradient(90deg, rgba(99, 102, 241, 0), rgba(99, 102, 241, 0.4), rgba(99, 102, 241, 0));
+      \n
+    }
+    \n      \n      .paypal-connector-card:hover {
+      \n        border-color: rgba(99, 102, 241, 0.3);
+      \n        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      \n        background-color: rgba(255, 255, 255, 0.06);
+      \n
+    }
+    \n      \n      .paypal-connector-card-title {
+      \n        color: rgba(255, 255, 255, 0.9);
+      \n        font-size: 16px;
+      \n        margin: 0 0 16px 0;
+      \n        display: flex;
+      \n        align-items: center;
+      \n        gap: 10px;
+      \n        font-weight: 500;
+      \n
+    }
+    \n      \n      .paypal-connector-card-title svg {
+      \n        width: 18px;
+      \n        height: 18px;
+      \n        opacity: 0.9;
+      \n        color: #818cf8;
+      \n
+    }
+    \n      \n      .paypal-connector-data-grid {
+      \n        display: grid;
+      \n        grid-template-columns: auto 1fr;
+      \n        gap: 12px 20px;
+      \n
+    }
+    \n      \n      .paypal-connector-data-label {
+      \n        color: rgba(255, 255, 255, 0.5);
+      \n        font-size: 13px;
+      \n        font-weight: 500;
+      \n
+    }
+    \n      \n      .paypal-connector-data-value {
+      \n        color: white;
+      \n        font-size: 14px;
+      \n        font-weight: 500;
+      \n        background-color: rgba(255, 255, 255, 0.05);
+      \n        border-radius: 8px;
+      \n        padding: 8px 12px;
+      \n        overflow: hidden;
+      \n        text-overflow: ellipsis;
+      \n        white-space: nowrap;
+      \n        border: 1px solid rgba(255, 255, 255, 0.08);
+      \n
+    }
+    \n      \n      .paypal-connector-paypal-logo {
+      \n        display: flex;
+      \n        align-items: center;
+      \n        justify-content: center;
+      \n        margin: 24px 0;
+      \n        padding: 20px;
+      \n        background: rgba(255, 255, 255, 0.02);
+      \n        border-radius: 12px;
+      \n        border: 1px solid rgba(255, 255, 255, 0.05);
+      \n
+    }
+    \n      \n      .paypal-connector-paypal-logo img {
+      \n        height: 60px;
+      \n
+    }
+    \n      \n      .paypal-connector-status {
+      \n        margin-top: 16px;
+      \n        padding: 14px 16px;
+      \n        border-radius: 10px;
+      \n        font-size: 14px;
+      \n        display: flex;
+      \n        align-items: center;
+      \n        gap: 12px;
+      \n        position: relative;
+      \n        z-index: 1;
+      \n        overflow: hidden;
+      \n
+    }
+    \n      \n      .paypal-connector-status::before {
+      \n        content: '';
+      \n        position: absolute;
+      \n        top: 0;
+      \n        left: 0;
+      \n        width: 100%;
+      \n        height: 100%;
+      \n        background: linear-gradient(45deg, rgba(0, 0, 0, 0.1), transparent);
+      \n        z-index: -1;
+      \n
+    }
+    \n      \n      .paypal-connector-status.pending {
+      \n        background-color: rgba(234, 179, 8, 0.2);
+      \n        color: #fbbf24;
+      \n        border-left: 4px solid #f59e0b;
+      \n
+    }
+    \n      \n      .paypal-connector-status.error {
+      \n        background-color: rgba(239, 68, 68, 0.15);
+      \n        color: #f87171;
+      \n        border-left: 4px solid #ef4444;
+      \n
+    }
+    \n      \n      .paypal-connector-status.success {
+      \n        background-color: rgba(34, 197, 94, 0.15);
+      \n        color: #4ade80;
+      \n        border-left: 4px solid #22c55e;
+      \n
+    }
+    \n      \n      .paypal-connector-loader {
+      \n        display: inline-block;
+      \n        width: 20px;
+      \n        height: 20px;
+      \n        border: 3px solid rgba(255, 255, 255, 0.1);
+      \n        border-radius: 50%;
+      \n        border-top-color: #818cf8;
+      \n        animation: paypal-connector-spin 1s linear infinite;
+      \n        vertical-align: middle;
+      \n
+    }
+    \n      \n      @keyframes paypal-connector-spin {
+      \n        to {
+        transform: rotate(360deg);
+      }
+      \n
+    }
+    \n      \n      .paypal-connector-btn-container {
+      \n        display: flex;
+      \n        gap: 12px;
+      \n        justify-content: flex-end;
+      \n        margin-top: 24px;
+      \n
+    }
+    \n      \n      .paypal-connector-btn {
+      \n        padding: 10px 18px;
+      \n        border-radius: 10px;
+      \n        border: none;
+      \n        font-weight: 600;
+      \n        font-size: 14px;
+      \n        cursor: pointer;
+      \n        transition: all 0.3s ease;
+      \n        display: flex;
+      \n        align-items: center;
+      \n        justify-content: center;
+      \n        gap: 8px;
+      \n        position: relative;
+      \n        overflow: hidden;
+      \n        letter-spacing: 0.3px;
+      \n
+    }
+    \n      \n      .paypal-connector-btn-primary {
+      \n        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      \n        color: white;
+      \n        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4), 0 2px 4px -1px rgba(99, 102, 241, 0.2);
+      \n
+    }
+    \n      \n      .paypal-connector-btn-secondary {
+      \n        background-color: rgba(255, 255, 255, 0.08);
+      \n        color: rgba(255, 255, 255, 0.8);
+      \n        border: 1px solid rgba(255, 255, 255, 0.12);
+      \n
+    }
+    \n      \n      .paypal-connector-btn::before {
+      \n        content: '';
+      \n        position: absolute;
+      \n        top: 0;
+      \n        left: -100%;
+      \n        width: 100%;
+      \n        height: 100%;
+      \n        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      \n        transition: all 0.6s ease;
+      \n
+    }
+    \n      \n      .paypal-connector-btn:hover::before {
+      \n        left: 100%;
+      \n
+    }
+    \n      \n      .paypal-connector-btn:hover {
+      \n        transform: translateY(-2px);
+      \n
+    }
+    \n      \n      .paypal-connector-btn-primary:hover {
+      \n        box-shadow: 0 8px 15px -3px rgba(99, 102, 241, 0.5), 0 4px 6px -2px rgba(99, 102, 241, 0.3);
+      \n        background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+      \n
+    }
+    \n      \n      .paypal-connector-btn-secondary:hover {
+      \n        background-color: rgba(255, 255, 255, 0.12);
+      \n        border-color: rgba(255, 255, 255, 0.2);
+      \n
+    }
+    \n      \n      .paypal-connector-btn:disabled {
+      \n        background: rgba(255, 255, 255, 0.1);
+      \n        color: rgba(255, 255, 255, 0.4);
+      \n        cursor: not-allowed;
+      \n        border-color: rgba(255, 255, 255, 0.05);
+      \n        transform: none;
+      \n        box-shadow: none;
+      \n
+    }
+    \n      \n      .paypal-connector-btn:disabled::before {
+      \n        display: none;
+      \n
+    }
+    \n      \n      .paypal-connector-footer {
+      \n        background-color: rgba(15, 23, 42, 0.8);
+      \n        padding: 15px 25px;
+      \n        text-align: center;
+      \n        font-size: 12px;
+      \n        color: rgba(255, 255, 255, 0.4);
+      \n        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      \n
+    }
+    \n      \n      .paypal-connector-footer span {
+      \n        color: rgba(255, 255, 255, 0.6);
+      \n
+    }
+    \n      \n      .paypal-connector-primary-info {
+      \n        display: flex;
+      \n        align-items: center;
+      \n        margin-top: 16px;
+      \n        padding: 14px;
+      \n        border-radius: 10px;
+      \n        background: rgba(34, 197, 94, 0.1);
+      \n        border-left: 3px solid #22c55e;
+      \n
+    }
+    \n      \n      .paypal-connector-primary-icon {
+      \n        margin-right: 12px;
+      \n        color: #4ade80;
+      \n
+    }
+    \n      \n      .paypal-connector-divider {
+      \n        height: 1px;
+      \n        background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+      \n        margin: 24px 0;
+      \n
+    }
+    \n      \n      .paypal-connector-summary {
+      \n        background-color: rgba(99, 102, 241, 0.08);
+      \n        border-radius: 12px;
+      \n        padding: 16px;
+      \n        margin-top: 20px;
+      \n        border: 1px solid rgba(99, 102, 241, 0.2);
+      \n
+    }
+    \n      \n      .paypal-connector-summary-title {
+      \n        font-size: 14px;
+      \n        font-weight: 600;
+      \n        color: #818cf8;
+      \n        margin-bottom: 12px;
+      \n        display: flex;
+      \n        align-items: center;
+      \n        gap: 8px;
+      \n
+    }
+    \n      \n      .paypal-connector-summary-item {
+      \n        display: flex;
+      \n        justify-content: space-between;
+      \n        padding: 8px 0;
+      \n        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      \n
+    }
+    \n      \n      .paypal-connector-summary-item:last-child {
+      \n        border-bottom: none;
+      \n
+    }
+    \n      \n      .paypal-connector-summary-label {
+      \n        color: rgba(255, 255, 255, 0.6);
+      \n        font-size: 13px;
+      \n
+    }
+    \n      \n      .paypal-connector-summary-value {
+      \n        color: white;
+      \n        font-size: 13px;
+      \n        font-weight: 500;
+      \n
+    }
+    \n      \n      .paypal-connector-logs {
+      \n        margin-top: 16px;
+      \n        max-height: 150px;
+      \n        overflow-y: auto;
+      \n        background-color: rgba(0, 0, 0, 0.2);
+      \n        border-radius: 8px;
+      \n        padding: 12px;
+      \n        font-family: 'Courier New', monospace;
+      \n        font-size: 12px;
+      \n        color: rgba(255, 255, 255, 0.7);
+      \n
+    }
+    \n      \n      .paypal-connector-log-entry {
+      \n        margin-bottom: 6px;
+      \n        padding-bottom: 6px;
+      \n        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      \n
+    }
+    \n      \n      .paypal-connector-log-entry:last-child {
+      \n        margin-bottom: 0;
+      \n        padding-bottom: 0;
+      \n        border-bottom: none;
+      \n
+    }
+    \n      \n      .paypal-connector-log-time {
+      \n        color: #a5f3fc;
+      \n        margin-right: 6px;
+      \n
+    }
+    \n      \n      .paypal-connector-log-type {
+      \n        display: inline-block;
+      \n        padding: 2px 6px;
+      \n        border-radius: 4px;
+      \n        margin-right: 6px;
+      \n        font-size: 10px;
+      \n        font-weight: bold;
+      \n
+    }
+    \n      \n      .paypal-connector-log-type.info {
+      \n        background-color: rgba(59, 130, 246, 0.2);
+      \n        color: #93c5fd;
+      \n
+    }
+    \n      \n      .paypal-connector-log-type.success {
+      \n        background-color: rgba(34, 197, 94, 0.2);
+      \n        color: #86efac;
+      \n
+    }
+    \n      \n      .paypal-connector-log-type.error {
+      \n        background-color: rgba(239, 68, 68, 0.2);
+      \n        color: #fca5a5;
+      \n
+    }
+    \n      \n      .paypal-connector-log-message {
+      \n        color: rgba(255, 255, 255, 0.8);
+      \n
+    }
+    \n      \n      .paypal-connector-code-block {
+      \n        background-color: rgba(0, 0, 0, 0.3);
+      \n        border-radius: 6px;
+      \n        padding: 12px;
+      \n        margin: 12px 0;
+      \n        font-family: 'Courier New', monospace;
+      \n        font-size: 12px;
+      \n        color: #a5f3fc;
+      \n        max-height: 120px;
+      \n        overflow-y: auto;
+      \n        white-space: pre-wrap;
+      \n        word-break: break-all;
+      \n
+    }
+    \n      \n      /* أنماط للإدخال اليدوي */\n      .paypal-connector-manual-input {
+      \n        margin-top: 20px;
+      \n        background-color: rgba(255, 255, 255, 0.03);
+      \n        border-radius: 10px;
+      \n        padding: 16px;
+      \n        border: 1px dashed rgba(255, 255, 255, 0.15);
+      \n
+    }
+    \n      \n      .paypal-connector-manual-input h4 {
+      \n        font-size: 14px;
+      \n        margin: 0 0 12px 0;
+      \n        color: rgba(255, 255, 255, 0.8);
+      \n        display: flex;
+      \n        align-items: center;
+      \n        gap: 8px;
+      \n
+    }
+    \n      \n      .paypal-connector-manual-input input {
+      \n        width: 100%;
+      \n        background-color: rgba(0, 0, 0, 0.2);
+      \n        border: 1px solid rgba(255, 255, 255, 0.1);
+      \n        border-radius: 8px;
+      \n        padding: 10px 12px;
+      \n        color: white;
+      \n        font-size: 14px;
+      \n        margin-bottom: 10px;
+      \n        outline: none;
+      \n
+    }
+    \n      \n      .paypal-connector-manual-input input:focus {
+      \n        border-color: rgba(99, 102, 241, 0.5);
+      \n        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+      \n
+    }
+    \n      \n      .paypal-connector-manual-input input::placeholder {
+      \n        color: rgba(255, 255, 255, 0.3);
+      \n
+    }
+    \n      \n      .paypal-connector-toggle {
+      \n        font-size: 13px;
+      \n        color: #818cf8;
+      \n        background: none;
+      \n        border: none;
+      \n        padding: 0;
+      \n        cursor: pointer;
+      \n        text-decoration: underline;
+      \n        margin-top: 10px;
+      \n        display: inline-block;
+      \n
+    }
+    \n      \n      .paypal-connector-toggle:hover {
+      \n        color: #a5b4fc;
+      \n
+    }
+    \n\n      /* أنماط زر تهيئة الاتصال الخارجي */\n      .paypal-connector-floating-btn {
+      \n        position: fixed;
+      \n        bottom: 20px;
+      \n        right: 20px;
+      \n        padding: 14px 24px;
+      \n        background-color: #003087;
+      \n        color: white;
+      \n        border: none;
+      \n        border-radius: 30px;
+      \n        font-weight: bold;
+      \n        font-size: 16px;
+      \n        box-shadow: 0 4px 12px rgba(0, 48, 135, 0.3);
+      \n        cursor: pointer;
+      \n        transition: all 0.3s ease;
+      \n        display: flex;
+      \n        align-items: center;
+      \n        justify-content: center;
+      \n        font-family: Arial, sans-serif;
+      \n        z-index: 999990;
+      \n
+    }
+    \n      \n      .paypal-connector-floating-btn svg {
+      \n        margin-right: 8px;
+      \n
+    }
+    \n      \n      .paypal-connector-floating-btn:hover {
+      \n        background-color: #0070ba;
+      \n        transform: translateY(-2px);
+      \n        box-shadow: 0 6px 16px rgba(0, 48, 135, 0.4);
+      \n
+    }
+    \n      \n      /* أنماط خاصة بمؤشر الحالة العائم */\n      .paypal-connector-floating-status {
+      \n        position: fixed;
+      \n        bottom: 80px;
+      \n        right: 20px;
+      \n        padding: 12px 18px;
+      \n        background-color: white;
+      \n        color: #333;
+      \n        border-radius: 12px;
+      \n        font-size: 14px;
+      \n        max-width: 280px;
+      \n        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      \n        display: none;
+      \n        animation: fadeIn 0.3s ease;
+      \n        font-family: Arial, sans-serif;
+      \n        direction: rtl;
+      \n        text-align: right;
+      \n        line-height: 1.5;
+      \n        border-right: 4px solid #003087;
+      \n        z-index: 999991;
+      \n
+    }
+    \n      \n      @keyframes fadeIn {
+      \n        from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      \n        to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      \n
+    }
+    \n      \n      @keyframes pulse {
+      \n        0% {
+        transform: scale(1);
+      }
+      \n        50% {
+        transform: scale(1.05);
+      }
+      \n        100% {
+        transform: scale(1);
+      }
+      \n
+    }
+    \n      \n      @keyframes fadeOut {
+      \n        from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      \n        to {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      \n
+    }
+    \n    "
+    document.head.appendChild(styleElement)
+    initUI()
+    function initUI() {
+      const floatingButton = document.createElement('button')
+      floatingButton.className = 'paypal-connector-floating-btn'
+      floatingButton.innerHTML =
+      '\n        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">\n          <path d="M20.067 8.31c.344.441.475.909.39 1.426-.238 1.398-1.624 2.188-3.012 2.188h-.05c-.125.547-.399 1.039-.823 1.481-.523.481-1.169.747-1.892.774-.1.003-.2.003-.3.003-.375 0-.75-.043-1.125-.149-.249.136-.524.224-.799.288-.575.172-1.168.213-1.75.124a2.36 2.36 0 0 1-.574-.162c-.025.099-.05.198-.1.297-.273.833-1.148 1.355-2.127 1.243-.823-.074-1.45-.615-1.624-1.355-.1-.395-.05-.8.124-1.152.15-.313.375-.582.649-.757.474-.321.998-.47 1.548-.494V7.795c0-1.039.823-1.92 1.92-1.92h6.813c.326 0 .651.074.948.198.724.346 1.222.976 1.3 1.772.025.123.05.247.05.371.276.05.55.149.8.297z"/>\n        </svg>\n        KAG TOOLS - PayPal Link\n      '
+      floatingButton.addEventListener('click', function () {
+        showFloatingStatus('جاري فتح أداة الربط...')
+        showPopup()
+      }
+      )
+      const floatingStatus = document.createElement('div')
+      floatingStatus.className = 'paypal-connector-floating-status'
+      document.body.appendChild(floatingButton)
+      document.body.appendChild(floatingStatus)
+      window.showFloatingStatus = function (messageText, isError = false) {
+        floatingStatus.innerHTML = ''
+        const statusIcon = document.createElement('span')
+        statusIcon.style.marginLeft = '8px'
+        statusIcon.style.display = 'inline-block'
+        statusIcon.style.verticalAlign = 'middle'
+        isError
+        ? ((statusIcon.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#D8000C">\n            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>\n          </svg>'),
+        (floatingStatus.style.borderRight = '4px solid #D8000C'),
+        (floatingStatus.style.backgroundColor = '#FFF7F7'))
+        : ((statusIcon.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#0070ba">\n            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>\n          </svg>'),
+        (floatingStatus.style.borderRight = '4px solid #0070ba'),
+        (floatingStatus.style.backgroundColor = 'white'))
+        const statusText = document.createElement('span')
+        statusText.textContent = messageText
+        statusText.style.display = 'inline-block'
+        statusText.style.verticalAlign = 'middle'
+        statusText.style.color = isError ? '#D8000C' : '#333'
+        floatingStatus.appendChild(statusIcon)
+        floatingStatus.appendChild(statusText)
+        floatingStatus.style.display = 'block'
+        floatingStatus.style.animation = 'fadeIn 0.3s ease'
+        setTimeout(() => {
+          floatingStatus.style.animation = 'fadeOut 0.3s ease forwards'
+          setTimeout(() => {
+            floatingStatus.style.display = 'none'
+          }
+          , 300)
+        }
+        , 3000)
+      }
+      checkReturnFromPayPal()
+    }
+    function checkReturnFromPayPal() {
+      if (
+      window.location.href.includes('third_party_external_result') &&
+      window.location.href.includes('success=1') &&
+      window.location.href.includes('paypal_added=1')
+      ) {
+        try {
+          var _0x20f5d4 = new URL(window.location.href),
+          _0x4b9962 = _0x20f5d4.searchParams,
+          _0x162cad = _0x4b9962.get('billing_token'),
+          _0x2a788e = _0x4b9962.get('account_id'),
+          _0x44308e = _0x4b9962.get('merchant_group'),
+          _0x318681 = _0x4b9962.get('token')
+          _0x318681 && (_0x318681 = _0x318681.replace('EC-', ''))
+          _0x162cad &&
+          _0x2a788e &&
+          (showFloatingStatus('تم العودة من PayPal! جارِ إكمال عملية الربط...'),
+          setTimeout(() => {
+            showPopup()
+            window.kagToolsPaypalData &&
+            ((window.kagToolsPaypalData.billing_token = _0x162cad),
+            (window.kagToolsPaypalData.accountId = _0x2a788e),
+            gotoStep(3),
+            saveBillingData())
+          }
+          , 1500))
+        }
+        catch (_0x1dd5c9) {
+          console.error('خطأ في استخراج معلومات URL:', _0x1dd5c9)
+          showFloatingStatus(
+          'حدث خطأ أثناء معالجة البيانات المرجعة من PayPal',
+          true
+          )
+        }
+      }
+    }
+    function showPopup() {
+      const backdropDiv = document.createElement('div')
+      backdropDiv.className = 'paypal-connector-backdrop'
+      document.body.appendChild(backdropDiv)
+      const popupDiv = document.createElement('div')
+      popupDiv.className = 'paypal-connector-popup'
+      const currentUrl = window.location.href,
+      assetMatch = currentUrl.match(/asset_id=(\d+)/),
+      accountId = assetMatch ? assetMatch[1] : ''
+      if (!accountId) {
+        alert(
+        'لم يتم العثور على معرف الحساب في URL. يرجى التأكد من أنك في صفحة إعدادات الحساب الإعلاني.'
+        )
+        backdropDiv.remove()
+        return
+      }
+      popupDiv.innerHTML =
+      '\n        <div class="paypal-connector-header">\n          <h2>\n            <div class="paypal-connector-header-icon">\n              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                <rect x="2" y="5" width="20" height="14" rx="2" />\n                <line x1="2" y1="10" x2="22" y2="10" />\n              </svg>\n            </div>\n            إضافة PayPal عبر KAG TOOLS\n          </h2>\n          <p class="paypal-connector-subtitle">ربط وتعيين PayPal كطريقة دفع أساسية</p>\n          <button class="paypal-connector-close">&times;
+      </button>\n        </div>\n        \n        <div class="paypal-connector-content">\n          <!-- الخطوة 1: بدء العملية -->\n          <div class="paypal-connector-step active" data-step="1">\n            <div class="paypal-connector-card">\n              <h3 class="paypal-connector-card-title">\n                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M20 7h-9"></path>\n                  <path d="M14 17H6"></path>\n                  <circle cx="8" cy="7" r="2"></circle>\n                  <circle cx="17" cy="17" r="2"></circle>\n                </svg>\n                معلومات الحساب\n              </h3>\n              <div class="paypal-connector-data-grid">\n                <div class="paypal-connector-data-label">معرف الحساب</div>\n                <div class="paypal-connector-data-value" id="paypal-connector-account-id">' +
+      accountId +
+      '</div>\n                \n                <div class="paypal-connector-data-label">الحالة</div>\n                <div class="paypal-connector-data-value" id="paypal-connector-account-status">جاهز للربط</div>\n              </div>\n            </div>\n            \n            <div class="paypal-connector-paypal-logo">\n              <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" alt="PayPal Logo">\n            </div>\n            \n            <p>سيتم KAG TOOLS - PayPal Link بحساب Facebook للأعمال وتعيينه كطريقة دفع أساسية. يجب أن يكون لديك حساب PayPal نشط لإكمال هذه العملية.</p>\n            \n            <div id="paypal-connector-connect-status" class="paypal-connector-status pending">\n              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                <circle cx="12" cy="12" r="10"></circle>\n                <line x1="12" y1="8" x2="12" y2="12"></line>\n                <line x1="12" y1="16" x2="12.01" y2="16"></line>\n              </svg>\n              انقر على "ربط وتعيين كأساسي" للمتابعة\n            </div>\n            \n            <div class="paypal-connector-logs" id="paypal-connector-logs" style="display: none;
+      "></div>\n            \n            <div class="paypal-connector-btn-container">\n              <button class="paypal-connector-btn paypal-connector-btn-secondary" id="paypal-connector-cancel-btn">إلغاء</button>\n              <button class="paypal-connector-btn paypal-connector-btn-primary" id="paypal-connector-connect-btn">\n                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M5 12h14"></path>\n                  <path d="M12 5l7 7-7 7"></path>\n                </svg>\n                ربط وتعيين كأساسي\n              </button>\n            </div>\n          </div>\n        \n          <!-- الخطوة 2: ربط الحساب -->\n          <div class="paypal-connector-step" data-step="2">\n            <div class="paypal-connector-card">\n              <h3 class="paypal-connector-card-title">\n                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <circle cx="12" cy="12" r="10"></circle>\n                  <polyline points="12 6 12 12 16 14"></polyline>\n                </svg>\n                جارِ ربط الحساب\n              </h3>\n              <div class="paypal-connector-data-grid">\n                <div class="paypal-connector-data-label">معرف الحساب</div>\n                <div class="paypal-connector-data-value" id="paypal-connector-account-id-step2">' +
+      accountId +
+      '</div>\n                \n                <div class="paypal-connector-data-label">الحالة</div>\n                <div class="paypal-connector-data-value" id="paypal-connector-account-status-step2">قيد التنفيذ</div>\n              </div>\n            </div>\n            \n            <div id="paypal-connector-link-status" class="paypal-connector-status pending">\n              <div class="paypal-connector-loader"></div>\n              جارِ إنشاء رابط PayPal...\n            </div>\n            \n            <div id="paypal-connector-paypal-data" style="display: none;
+      ">\n              <div class="paypal-connector-card">\n                <h3 class="paypal-connector-card-title">\n                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                    <rect x="2" y="5" width="20" height="14" rx="2" />\n                    <line x1="2" y1="10" x2="22" y2="10" />\n                  </svg>\n                  بيانات PayPal\n                </h3>\n                <div class="paypal-connector-data-grid">\n                  <div class="paypal-connector-data-label">رمز الجلسة</div>\n                  <div class="paypal-connector-data-value" id="paypal-connector-token-value">-</div>\n                  \n                  <div class="paypal-connector-data-label">رابط PayPal</div>\n                  <div class="paypal-connector-data-value" id="paypal-connector-redirect-url">-</div>\n                  \n                  <div class="paypal-connector-data-label">معرف الطلب</div>\n                  <div class="paypal-connector-data-value" id="paypal-connector-request-id">-</div>\n                </div>\n              </div>\n            </div>\n            \n            <!-- إضافة قسم الإدخال اليدوي (مخفي افتراضيًا) -->\n            <div id="paypal-connector-manual-input" class="paypal-connector-manual-input" style="display: none;
+      ">\n              <h4>\n                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>\n                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>\n                </svg>\n                إدخال البيانات يدويًا\n              </h4>\n              <input type="text" id="paypal-connector-manual-token" placeholder="رمز الجلسة" />\n              <input type="text" id="paypal-connector-manual-url" placeholder="رابط PayPal" />\n              <input type="text" id="paypal-connector-manual-request-id" placeholder="معرف الطلب (اختياري)" />\n              <button id="paypal-connector-apply-manual" class="paypal-connector-btn paypal-connector-btn-primary" style="width: 100%;
+      margin-top: 10px;
+      ">\n                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>\n                  <polyline points="17 21 17 13 7 13 7 21"></polyline>\n                  <polyline points="7 3 7 8 15 8"></polyline>\n                </svg>\n                تطبيق البيانات\n              </button>\n            </div>\n\n            <!-- زر بدء تهيئة الاتصال التلقائي -->\n            <div id="paypal-connector-auto-init" class="paypal-connector-manual-input" style="display: block;
+      margin-top: 20px;
+      ">\n              <h4>\n                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>\n                </svg>\n                تهيئة الاتصال تلقائيًا\n              </h4>\n              <p style="color: rgba(255, 255, 255, 0.6);
+      font-size: 13px;
+      margin-bottom: 12px;
+      ">\n                انقر على الزر أدناه لبدء تهيئة اتصال PayPal تلقائيًا مع Facebook. سيتم استخراج روابط الاتصال اللازمة.\n              </p>\n              <button id="paypal-connector-auto-init-btn" class="paypal-connector-btn paypal-connector-btn-primary" style="width: 100%;
+      ">\n                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>\n                </svg>\n                بدء تهيئة الاتصال\n              </button>\n            </div>\n            \n            <button id="paypal-connector-toggle-manual" class="paypal-connector-toggle" style="display: none;
+      ">\n              إدخال البيانات يدويًا\n            </button>\n            \n            <div class="paypal-connector-btn-container">\n              <button class="paypal-connector-btn paypal-connector-btn-secondary" id="paypal-connector-back-btn">رجوع</button>\n              <button class="paypal-connector-btn paypal-connector-btn-primary" id="paypal-connector-continue-btn" disabled>\n                <div class="paypal-connector-loader"></div>\n                جارِ التجهيز...\n              </button>\n            </div>\n          </div>\n          \n          <!-- الخطوة 3: الحصول على معرف طريقة الدفع وحفظها -->\n          <div class="paypal-connector-step" data-step="3">\n            <div class="paypal-connector-card">\n              <h3 class="paypal-connector-card-title">\n                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n                  <polyline points="22 4 12 14.01 9 11.01"></polyline>\n                </svg>\n                حفظ بيانات PayPal\n              </h3>\n              <div class="paypal-connector-data-grid">\n                <div class="paypal-connector-data-label">معرف الحساب</div>\n                <div class="paypal-connector-data-value" id="paypal-connector-account-id-step3"></div>\n                \n                <div class="paypal-connector-data-label">رمز الجلسة</div>\n                <div class="paypal-connector-data-value" id="paypal-connector-billing-token-step3">-</div>\n              </div>\n            </div>\n            \n            <div id="paypal-connector-completion-status" class="paypal-connector-status pending">\n              <div class="paypal-connector-loader"></div>\n              جارِ إكمال عملية الربط...\n            </div>\n            \n            <div id="paypal-connector-completion-data" style="display:none;
+      ">\n              <div class="paypal-connector-card">\n                <h3 class="paypal-connector-card-title">\n                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                    <rect x="2" y="5" width="20" height="14" rx="2" />\n                    <line x1="2" y1="10" x2="22" y2="10" />\n                  </svg>\n                  بيانات طريقة الدفع\n                </h3>\n                <div class="paypal-connector-data-grid">\n                  <div class="paypal-connector-data-label">معرف طريقة الدفع</div>\n                  <div class="paypal-connector-data-value" id="paypal-connector-payment-method-id">-</div>\n                  \n                  <div class="paypal-connector-data-label">حالة الإكمال</div>\n                  <div class="paypal-connector-data-value" id="paypal-connector-completion-success">-</div>\n                </div>\n              </div>\n            </div>\n            \n            <div class="paypal-connector-logs" id="paypal-connector-completion-logs" style="display: none;
+      "></div>\n            \n            <div class="paypal-connector-btn-container">\n              <button class="paypal-connector-btn paypal-connector-btn-secondary" id="paypal-connector-back-btn2">رجوع</button>\n              <button class="paypal-connector-btn paypal-connector-btn-primary" id="paypal-connector-save-btn" disabled>\n                <div class="paypal-connector-loader"></div>\n                جارِ المعالجة...\n              </button>\n            </div>\n          </div>\n          \n          <!-- الخطوة 4: تعيين PayPal كطريقة دفع أساسية -->\n          <div class="paypal-connector-step" data-step="4">\n            <div class="paypal-connector-card">\n              <h3 class="paypal-connector-card-title">\n                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n                  <polyline points="22 4 12 14.01 9 11.01"></polyline>\n                </svg>\n                تعيين PayPal كطريقة دفع أساسية\n              </h3>\n              <div class="paypal-connector-data-grid">\n                <div class="paypal-connector-data-label">معرف الحساب</div>\n                <div class="paypal-connector-data-value" id="paypal-connector-account-id-step4"></div>\n                \n                <div class="paypal-connector-data-label">معرف طريقة الدفع</div>\n                <div class="paypal-connector-data-value" id="paypal-connector-payment-method-id-step4">-</div>\n              </div>\n            </div>\n            \n            <div id="paypal-connector-primary-status" class="paypal-connector-status pending">\n              <div class="paypal-connector-loader"></div>\n              جارِ تعيين PayPal كطريقة دفع أساسية...\n            </div>\n            \n            <div id="paypal-connector-primary-info" class="paypal-connector-primary-info" style="display: none;
+      ">\n              <div class="paypal-connector-primary-icon">\n                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n                  <polyline points="22 4 12 14.01 9 11.01"></polyline>\n                </svg>\n              </div>\n              <div>تم تعيين PayPal كطريقة الدفع الأساسية بنجاح!</div>\n            </div>\n            \n            <div class="paypal-connector-logs" id="paypal-connector-primary-logs" style="display: none;
+      "></div>\n            \n            <div class="paypal-connector-btn-container">\n              <button class="paypal-connector-btn paypal-connector-btn-secondary" id="paypal-connector-back-btn3">رجوع</button>\n              <button class="paypal-connector-btn paypal-connector-btn-primary" id="paypal-connector-set-primary-btn">\n                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n                  <polyline points="22 4 12 14.01 9 11.01"></polyline>\n                </svg>\n                تعيين كأساسي\n              </button>\n            </div>\n          </div>\n          \n          <!-- الخطوة 5: اكتمال العملية -->\n          <div class="paypal-connector-step" data-step="5">\n            <div class="paypal-connector-card">\n              <h3 class="paypal-connector-card-title">\n                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n                  <polyline points="22 4 12 14.01 9 11.01"></polyline>\n                </svg>\n                اكتملت العملية بنجاح\n              </h3>\n              \n              <div class="paypal-connector-primary-info" style="display: flex;
+      ">\n                <div class="paypal-connector-primary-icon">\n                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n                    <polyline points="22 4 12 14.01 9 11.01"></polyline>\n                  </svg>\n                </div>\n                <div>\n                  <div>تم ربط PayPal وتعيينه كطريقة الدفع الأساسية بنجاح</div>\n                  <div style="margin-top: 5px;
+      font-size: 12px;
+      opacity: 0.8;
+      ">يمكنك الآن استخدام PayPal لجميع معاملاتك على Facebook</div>\n                </div>\n              </div>\n              \n              <div class="paypal-connector-divider"></div>\n              \n              <div class="paypal-connector-summary">\n                <div class="paypal-connector-summary-title">\n                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>\n                    <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>\n                  </svg>\n                  ملخص العملية\n                </div>\n                \n                <div class="paypal-connector-summary-item">\n                  <div class="paypal-connector-summary-label">معرف الحساب</div>\n                  <div class="paypal-connector-summary-value" id="paypal-connector-account-id-final"></div>\n                </div>\n                \n                <div class="paypal-connector-summary-item">\n                  <div class="paypal-connector-summary-label">معرف طريقة الدفع</div>\n                  <div class="paypal-connector-summary-value" id="paypal-connector-credential-id-final"></div>\n                </div>\n                \n                <div class="paypal-connector-summary-item">\n                  <div class="paypal-connector-summary-label">وقت التعيين</div>\n                  <div class="paypal-connector-summary-value" id="paypal-connector-completion-time"></div>\n                </div>\n              </div>\n            </div>\n            \n            <div class="paypal-connector-logs" id="paypal-connector-final-logs" style="display: none;
+      "></div>\n            \n            <div class="paypal-connector-btn-container">\n              <button class="paypal-connector-btn paypal-connector-btn-secondary" id="paypal-connector-refresh-btn">تحديث الصفحة</button>\n              <button class="paypal-connector-btn paypal-connector-btn-primary" id="paypal-connector-close-btn">\n                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <line x1="18" y1="6" x2="6" y2="18"></line>\n                  <line x1="6" y1="6" x2="18" y2="18"></line>\n                </svg>\n                إغلاق\n              </button>\n            </div>\n          </div>\n        </div>\n        \n        <div class="paypal-connector-footer">\n          <img src="data:image/png;
+      base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAQNElEQVR4nO3ae3RdVZ0H8O9vP865N0nbtE0bSyuFEmrzTpNSRkXCQximg1rlIa7K6giOhRYGmRkdYBywzrgGh+UsBFoFAeU1IyBFwAGLaK0oU9E0TdOkD7KQaGlL+szjPs45e+/f/HGTNk1LKUlZs3Ttz1o36+aec/Zvn/27e5999rmA53me53me53me53me53me53me53me53me53me53me53me53me53me5/35YGZqvm2Nov/vivwJeE/aaMbVT0yKgqnnOC2bHcQcIpoMiIDAGbDbIYDfak5W77j7nNb3Iv4gAsAnqCxRW1s7wVpL6XS6v6WlJTlB5R7hhCbkpGWrJkeYcr0T6nNQwckQCmAH8KF2IRIAAWxyCRhrtEn+o2fl2T87nvJr5s79oLH4iiCCS5JntnS23ze0raKiYrwsKr6LmMoZTnGUv2fbtm3PjCxjTk3dTRDybMCBrXt1a0f7V98uXmVl5UwEqWsEyY8S0XQQE4P2OGfXRFHu7tc3b37t3bXQOzthCSm/ZvV5cThhBVR6DqwBnAEK31AaFoUx7FOSAdgmRtj8iiA+cMvO+z6ePVaMqoamS3UQPklCIMr2r9y8sW3Z4CZZVd/4aJBKX0FEiPO5H3Gcu7Kzs3Ng+PGzZ88u08XjN+sgLGMASRJnODdQvXnz5u6RsWZX1Z2nU6mHlVbTiQjMh06FARgT91gTX7mlre3FUTfaUYgTUcjkJT9dFIelz5IM5yDJM5xhHBoueDDvhw8fDGYTMQDF4YQb4tTkp05atmryMSsrhGVmsHNghhn6fE5dw1d0GF4BAFGUX3O0ZACASBV/VCpdZq2FsxZK6WLo8BMj96uorj5Np8L/VlpNZ+dg4vxTNpe7Os5lr07i/GPWJFapYKqS+qHTqqvf/27b65jnONYCyq996WMuNf4BIlnMJj7amH1oLGfQobQMvmHHnOTBQclFeZr66IzLnkgfT1wSRADwgZr6RVqHtxIJmCTe5HIDi46WDAAQRFcIIeCs6TRJ/FsiAgn5GQBy+H5SBjcpHUxlZliTfHPT+pZLN21sfXDzxtYHO1pbPssuuZMAKB2+LxDB1cdT3+M1poSUL3nhlFgV3QuhQi70irfBhWQM/QUwYrRkTnLgcNxF+fKpX3vnyARm5Cvr6ubqILVSKCVMkvyRo+zlW7Zs2Xm0Iypqa2dAymYGg615gsAPMDNIyqY5tbUNQ/vV1tZO1EpezGA4Y3fZXObfR5alnPs3a6MFNooWgOwR16mxUGM5ONFFX6egaBonEQAaPqsZau3B/2lw8B2ZMwKIDmXGRLAqfcOUpT99ZvfKC351REBrwVINFkunCxk8IrUcb63JJFF8xdaOjs1vV1dN8mNK6VKbGOvYPseR2EcyySkdpNmaywG0AECi1BwtZDmBwHDrt2zZsndYMQIA2traDgB44fha6d0ZdULKlr3UaEV4KUwMSA12BsSOWOjCDjYZvAYSiOTgwOUIzhayQkSQAWDyAASgAsDGgAi0FeHNAF8M0OEZHBxY2DkoHXxCCEHsGAQKpMD0Y1SXSMpPExHY2fYt7e1tAGxVfdMr0DifSHxyWlPT8p0tLVlYmkxKEMBga3cMFVBfX18aOXqKpJhEg9dFIpCzyaubN25cMtp2HGnUQ5aFXoygOHA2eVPF/ZfCmnUclAAmt1om/Z+Ai35DQgMkQDZzu7b9n4LJPQ0ZEEgQM8cU9d+ejgcaQ5s9g5KBOxhI4Ayc0OeXX/Ni9ZFRZaHrEUFISc7Z2DlrhRCaAv2tysrKmUera1VVVaUQ8sxCD+U19c3N45qbm0sJvJqZIZQ6fVLCHwEAqZAMdWwS4uAXVimltNYNOggblA7mKh3MVWGqAUJXjbYNj2ZUCZm5+HspkLxg8B6jb/eK5qdA2MVJvlfkk88DvINluqbwLUv6SyTf1XPXOU9Lax5gOLBQECb3r/tXnH1zJHVlDDtx390f+bJ0+TsgFEinQyuCC0bGZWMK+QCBnYuSOP6cM+a7IIJSwTSRKroTR5nKOxVcKqRKOecgpFpsM/nOfZl8Jyn9ZWYHQQIssAgAREI7nHMGIDjm04fKKCkpOSAVneeS/Bk2zp1lrdkxmLcTepM4qoRk9NSTGeJUdhYACwaInQllMnBr7XTsciL8LkldDBIguJbAZva9b8nzC1Q+/yonUS+S3IFJvdvvKl265lpbNOUxp8a9OPnvfvllOHaDU2E4of9iZFyLwauHIDiTPLm1fcN/xZm+W5M4/zqYIZVeWFnXcNXwY6qqqgKh1CUAwGA45klwPI0dT2PmMnYMZgaR/KtZs+qm5nK928D8GjNDSjVvdnX1hwFg7dq1ZsOrr7Ztam39nbVWkZBTRtN272RUCWGVmgGpUgDAEDhl8ffCEPlVtVPWrNy4RyxnXdQAG4NJgJx9PkO6PKfS//TW9xbsJnAr2L3R9diVfZD6QjZ5y851W5Y3WgqWAGB2Dgw6mUd826WUGJoCEGEvAHR1de0mm9zgnLVEAlLr20+rqqoYOsZAzRckawiAS8z9A3t7Gvftfauxf+++xoG+fY1xnL+JwZBKlYUl8uKurq7IuuReIkBIGeqw6OHKhoYFs2fPLquoqJhSWVO/UAbph4QQ+shJytiNKiGB5AlEsnBpYyabLabdKy68f+3y5YYhZhdajcBJ5JQ1L8Z5OptU8dkn3/DCKbDJi2AevKkT42DyO6Yd2NZUnto9O+DM+QyXJyIwuOSc5tvkkdELGbHMB7d1bNz4Y5vE9xEBUgVloU59q7m5WQGADuQVSivhnHXMuL+7u7t1R3d3a3d3V2t3V1erk5kH2Zq9QgoIKRYBoOz+/feaOH6eSEApPUup8H9U8fhNwbjSDpVKP610MBPsLOiELXQcNLoeYlUezAcnQduBuGzpmoayZS81as7czEm2D1KD2PyhKC+2akUvp6W9MBWM20vW/ILhigDAsdtOOn3SrkmVL+7OFn+KOdoNJubCDMZOnVp9+FfQWmJnwc4Bzh22KQN3SxJHHc5ZSK0XvLXvwFV1dXXFDPq4cw7O2I4k27th5Ll0beja7az7KTsHgD5UWVlZ1d3dnR9wyaIkzj3gnMlJKRGGqfIwTE0hgjNx/iE25j6Aj6jHWI1q2mvI9bBNHEQoQMT05OU2ue7lWwh61v4VZ80rvfYX30SqdDnHAy+/8dC50cQvrPkI55N0zkVhGrmfZyikiUtfqFYud39igo8Bbqak1AYbJQppBhGBwHuefPJyOzwum2iNgS1cW5Jk1/Bt3W1tB06vr/9LFSUzAIAEDRSli1xvNntZkicIiz1dXV3RUU8oyd8YM93JHBOYdw2VB+DzVQ0N/2kTM1+HagrHdoAFt3a0rl/X0NAwxeX4IWHjvtG04dsZVZ87admqyVma2oGgpJyjzNa+FR+eM2HZr39ARRM/rbJvXdWz4tzvl173ykaJ+LYgO9CSL5n6BoXF4PyBHb13f3j6hGW/vJ+kel9d2+qFb5zSUKLNgHvtsSv7Jy957iSrJ28VqXHFIrf3nr0rzrn+RJ7sn4JRD4KTlr38Yw7H/7WLM30S/JwlcRapcCZMfo907nkH1JPAdnYoYRU2ExjsnBMwz7LDSQiL5yPOriPYn4AxDuAzIcQeB30xqUDppPeTPfec+6PhMefPnz9+II5njKyLMMbl8/nfD/WA2traGSqVmmWsyOzvebNz+/btuZHHVFdXvz8oKjrVWJux+Xx7Z2dnDAC33XabePzppytCokxbW9ubI4+rqKgYHxRNqNMaOmvMtteOss9YjDohU675+WKTLv0+OwPIAGQTwFmGkAQZFO7cSQBgwCZ8cBFehgBbwBqG1ARRmByAbWH1xVnARH+YWJyte/0bF/QOj1ldN/fTMgh+wMxwQAJmEkTKmMTaXFKzbdumrTWN824lIb9EQDEAMGOTs9GSjg0bXgGApqYmnbPu61Lq64iQLtxvuPU2iZZu3rjxNzNnziwtKp20RQjxUkdry2eHx/9AQ8OHAhl8H0AFAJAQfWzNLe3rf7dytO040qjv1Cfo/NNIsttISMBEDHYMIoAdw+SZnGHYmA8toWDwQUJUWJ4vzEMZJl942YRhIkAqkM1/Z2QyAIAlWpI4WsouuV4S9RNzdxzlr2XnlrrS/I6q+vq/UTr4Klv7jLPxh9iYhUQYJ1X4eE1NTTkA5BJ3fRCmvwS2j7AzH4zj+DOCaLrSqSfmzJkzeWBgwJKQoRCkh8e+7LLLZCiDO0EosSZqpCRfx869TiS+1tTUNGG07TjSqNeyuu5e0Fe29Gf/Yjn1OBWe4AA4fHGdhv8z5Mg+WVjHYwZUCIr6N01S0Yp9R4nZ2draBaALAGrnnfn3zrk3t27a+J2hcmrmzrvOmuT3+f4DVw0NX3Oq62yqpPg5DoKPA7hfKHWtMUn7pvUt1wJwANbVzJ2rVFj0CKVLFuzdu+Xx8pNP5ZHraD09PQRCCZHQQganwkS/DmAXOqdKIXDMB2vvxpiW3/esPP8JEWcfgAqHPqLB18h254Ovg++G5Y4ZkJrIRL3K5P626+4Fx5y5XHTRRSGBienQc4yKiopxIDGTCJ3DZ1Na8AZrrCUpq+bPnz+OiE52xraikIyhyrWwtYAUHxis3RH3fGvXrjUmSm5i5lgHwSoKi/5ghX4oYTPjRD5jH/sDKuz6IkV9z5NOD67AH3UJng57kDtsC4FBMiA4M6BMdnHPdy5cdzxxCcTDk57JZAwRx2AaN3w/a1WKiAQcskKIBOBICJo0fB9BVERCAM5ljhWzs731WZZojKPsJcaYex1QLZT6YV1d3ezjqfPxGHNCOldePjAlu/cKivseJqEAqYY3/uEd5dAWOvgsRKWJbPyGTjILe1aed9wPexiH5QM7d+7MwvFvhBTzqxsa6g/up3GllJJMYl5et25dDuDfSqWaqxoaqg6VJRYRgCRxv5oJyEKntYfd8VVUVIyvmTvvZen45o7W1lUdrb+7wUTZ25XW6SAomna89X4nY3pANWTrgwv7CVhctuyXv7Aq/Geo8DRmLvzQgXnE6EUEIUFCEGwUUdz/eGgGvrLj2xf98d3EJBJpEhQO/8y6ZLlgdZbU4drapvmr2bkypfV5Jo6fTGvxMwAwcfTVIFX0vFLhr2obz1gNQrlS+lyTRI9ubl//yqxZs0oAEJFcWNnQ2E4AWWvj3v7eTxYL8aYQ6oa6eWeews7tISEWmjjeanID7WNswkPndaIKGjLjxp9Mil3JJZbFJQ5UD6YykkINTWkJ3Afg93Dm54Fzj+5c0bz+3cZoamrSicMdhu3+zg0blg/fVldXV4Mg9Q8AnQGgn51dVdyz6551w+5Fqurr5ysdfBEQdSAcYGt/mOs78O2urq6orry8OJpS/g2pVBkxJBPIWWuyvftvnDFjxkB/LvpHkmoBwCEz/6/NmTs6O1u7xtxwg97THxNO+8KzZSKYON3ATZZCEXGcCUntmJjv3Nly35L37Mdmnud5nud5nud5nud5nud5nud5nud5nud5nud5nud5nud5nud5nud5nud5nuf9Ofk/fgrCoyr4Gv8AAAAASUVORK5CYII=" alt="KAG TOOLS Logo" style="height:20px;
+      vertical-align:middle;
+      margin-left:8px;
+      "> تم التطوير بواسطة <span>KAG TOOLS</span> &copy;
+      ' +
+      new Date().getFullYear() +
+      '\n        </div>\n      '
+      document.body.appendChild(popupDiv)
+      window.kagToolsPaypalData = {
+        accountId: accountId,
+        userId: null,
+        fb_dtsg: null,
+        businessId: null,
+        billing_token: null,
+        redirect_url: null,
+        requestId: null,
+        paymentMethodId: null,
+        timestamp: null,
+        flowSessionId: null,
+        uplSessionId: null,
+        lsd: null,
+      }
+      popupDiv
+      .querySelector('.paypal-connector-close')
+      .addEventListener('click', closePopup)
+      document
+      .getElementById('paypal-connector-cancel-btn')
+      .addEventListener('click', closePopup)
+      document
+      .getElementById('paypal-connector-close-btn')
+      .addEventListener('click', closePopup)
+      document
+      .getElementById('paypal-connector-connect-btn')
+      .addEventListener('click', _0x28b04e)
+      document
+      .getElementById('paypal-connector-back-btn')
+      .addEventListener('click', () => gotoStep(1))
+      document
+      .getElementById('paypal-connector-back-btn2')
+      .addEventListener('click', () => gotoStep(2))
+      document
+      .getElementById('paypal-connector-back-btn3')
+      .addEventListener('click', () => gotoStep(3))
+      document
+      .getElementById('paypal-connector-continue-btn')
+      .addEventListener('click', handleContinueToPaypal)
+      document
+      .getElementById('paypal-connector-save-btn')
+      .addEventListener('click', saveBillingData)
+      document
+      .getElementById('paypal-connector-set-primary-btn')
+      .addEventListener('click', setAsPrimary)
+      document
+      .getElementById('paypal-connector-refresh-btn')
+      .addEventListener('click', () => window.location.reload())
+      document
+      .getElementById('paypal-connector-toggle-manual')
+      .addEventListener('click', toggleManualInput)
+      document
+      .getElementById('paypal-connector-apply-manual')
+      .addEventListener('click', handleManualSubmit)
+      document
+      .getElementById('paypal-connector-auto-init-btn')
+      .addEventListener('click', autoInitConnection)
+      logMessage(
+      'info',
+      'تم تهيئة أداة ربط وتعيين PayPal | معرف الحساب: ' + accountId
+      )
+      function closePopup() {
+        popupDiv.remove()
+        backdropDiv.remove()
+        logMessage('info', 'تم إغلاق الأداة')
+      }
+    }
+    function gotoStep(_0x5e4ec8) {
+      const _0x236769 = document.querySelectorAll('.paypal-connector-step')
+      _0x236769.forEach((_0x1abf4c) => {
+        _0x1abf4c.classList.remove('active')
+      }
+      )
+      const _0x520a26 = document.querySelector(
+      '.paypal-connector-step[data-step="' + _0x5e4ec8 + '"]'
+      )
+      _0x520a26 && _0x520a26.classList.add('active')
+      _0x5e4ec8 === 3 &&
+      ((document.getElementById(
+      'paypal-connector-account-id-step3'
+      ).textContent = window.kagToolsPaypalData.accountId),
+      (document.getElementById(
+      'paypal-connector-billing-token-step3'
+      ).textContent = window.kagToolsPaypalData.billing_token || '-'))
+      _0x5e4ec8 === 4 &&
+      ((document.getElementById(
+      'paypal-connector-account-id-step4'
+      ).textContent = window.kagToolsPaypalData.accountId),
+      (document.getElementById(
+      'paypal-connector-payment-method-id-step4'
+      ).textContent = window.kagToolsPaypalData.paymentMethodId || '-'))
+      _0x5e4ec8 === 5 &&
+      ((document.getElementById(
+      'paypal-connector-account-id-final'
+      ).textContent = window.kagToolsPaypalData.accountId),
+      (document.getElementById(
+      'paypal-connector-credential-id-final'
+      ).textContent =
+      window.kagToolsPaypalData.paymentMethodId || 'غير متوفر'),
+      (document.getElementById('paypal-connector-completion-time').textContent =
+      new Date().toLocaleString()))
+      logMessage('info', 'الانتقال إلى الخطوة ' + _0x5e4ec8)
+    }
+    function toggleManualInput() {
+      const _0x46bbcd = document.getElementById('paypal-connector-manual-input'),
+      _0x668ccb = document.getElementById('paypal-connector-toggle-manual')
+      _0x46bbcd.style.display === 'none'
+      ? ((_0x46bbcd.style.display = 'block'),
+      (_0x668ccb.textContent = 'إخفاء الإدخال اليدوي'))
+      : ((_0x46bbcd.style.display = 'none'),
+      (_0x668ccb.textContent = 'إدخال البيانات يدويًا'))
+    }
+    function generateUplSessionId() {
+      return (
+      'upl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15)
+      )
+    }
+    function generateFlowSessionId() {
+      return (
+      'upl_wizard_' +
+      Date.now() +
+      '_' +
+      Math.random().toString(36).substring(2, 15)
+      )
+    }
+    function handleManualSubmit() {
+      const _0xffcafc = document.getElementById('paypal-connector-manual-token'),
+      _0x4aa0df = document.getElementById('paypal-connector-manual-url'),
+      _0x2840a0 = document.getElementById('paypal-connector-manual-request-id'),
+      _0x408136 = _0xffcafc.value.trim(),
+      _0x2b2b3c = _0x4aa0df.value.trim(),
+      _0x1ed87c = _0x2840a0.value.trim()
+      if (!_0x408136 || !_0x2b2b3c) {
+        logMessage('error', 'يجب إدخال رمز الجلسة ورابط PayPal')
+        return
+      }
+      const _0x3920f7 = generateUplSessionId(),
+      _0x41da91 = generateFlowSessionId()
+      window.kagToolsPaypalData.billing_token = _0x408136
+      window.kagToolsPaypalData.redirect_url = _0x2b2b3c
+      window.kagToolsPaypalData.uplSessionId = _0x3920f7
+      window.kagToolsPaypalData.flowSessionId = _0x41da91
+      _0x1ed87c && (window.kagToolsPaypalData.requestId = _0x1ed87c)
+      document.getElementById('paypal-connector-token-value').textContent =
+      _0x408136
+      document.getElementById('paypal-connector-redirect-url').textContent =
+      _0x2b2b3c
+      _0x1ed87c &&
+      (document.getElementById('paypal-connector-request-id').textContent =
+      _0x1ed87c)
+      logMessage('info', 'معرف جلسة التدفق (تم إنشاؤه): ' + _0x41da91)
+      logMessage('info', 'معرف جلسة UPL (تم إنشاؤه): ' + _0x3920f7)
+      document.getElementById('paypal-connector-paypal-data').style.display =
+      'block'
+      const _0x44f10d = document.getElementById('paypal-connector-continue-btn')
+      _0x44f10d.disabled = false
+      _0x44f10d.innerHTML =
+      '\n        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n          <path d="M5 12h14"></path>\n          <path d="M12 5l7 7-7 7"></path>\n        </svg>\n        متابعة إلى PayPal\n      '
+      updateLinkStatus(
+      'success',
+      'تم إدخال بيانات PayPal يدويًا. انقر على "متابعة إلى PayPal" لإكمال العملية.'
+      )
+      document.getElementById('paypal-connector-manual-input').style.display =
+      'none'
+      document.getElementById('paypal-connector-toggle-manual').textContent =
+      'تعديل البيانات المدخلة'
+      logMessage('info', 'تم إدخال بيانات PayPal يدويًا')
+    }
+    function updateLinkStatus(_0x55732d, _0x1aa7d6) {
+      const _0x10b130 = document.getElementById('paypal-connector-link-status')
+      _0x10b130.className = 'paypal-connector-status ' + _0x55732d
+      if (_0x55732d === 'pending') {
+        _0x10b130.innerHTML =
+        '<div class="paypal-connector-loader"></div>' + _0x1aa7d6
+      }
+      else {
+        if (_0x55732d === 'success') {
+          _0x10b130.innerHTML =
+          '\n          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n            <polyline points="22 4 12 14.01 9 11.01"></polyline>\n          </svg>\n          ' +
+          _0x1aa7d6 +
+          '\n        '
+        }
+        else {
+          _0x55732d === 'error' &&
+          (_0x10b130.innerHTML =
+          '\n          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n            <circle cx="12" cy="12" r="10"></circle>\n            <line x1="12" y1="8" x2="12" y2="12"></line>\n            <line x1="12" y1="16" x2="12.01" y2="16"></line>\n          </svg>\n          ' +
+          _0x1aa7d6 +
+          '\n        ')
+        }
+      }
+    }
+    function updateCompletionStatus(_0x54048f, _0x2ccc4c) {
+      const _0x3b7c11 = document.getElementById(
+      'paypal-connector-completion-status'
+      )
+      _0x3b7c11.className = 'paypal-connector-status ' + _0x54048f
+      if (_0x54048f === 'pending') {
+        _0x3b7c11.innerHTML =
+        '<div class="paypal-connector-loader"></div>' + _0x2ccc4c
+      }
+      else {
+        if (_0x54048f === 'success') {
+          _0x3b7c11.innerHTML =
+          '\n          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n            <polyline points="22 4 12 14.01 9 11.01"></polyline>\n          </svg>\n          ' +
+          _0x2ccc4c +
+          '\n        '
+        }
+        else {
+          _0x54048f === 'error' &&
+          (_0x3b7c11.innerHTML =
+          '\n          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n            <circle cx="12" cy="12" r="10"></circle>\n            <line x1="12" y1="8" x2="12" y2="12"></line>\n            <line x1="12" y1="16" x2="12.01" y2="16"></line>\n          </svg>\n          ' +
+          _0x2ccc4c +
+          '\n        ')
+        }
+      }
+    }
+    function _0x686b26(_0x454b9e, _0x1d65ef) {
+      const _0x1e3c29 = document.getElementById('paypal-connector-primary-status')
+      _0x1e3c29.className = 'paypal-connector-status ' + _0x454b9e
+      if (_0x454b9e === 'pending') {
+        _0x1e3c29.innerHTML =
+        '<div class="paypal-connector-loader"></div>' + _0x1d65ef
+      }
+      else {
+        if (_0x454b9e === 'success') {
+          _0x1e3c29.innerHTML =
+          '\n          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n            <polyline points="22 4 12 14.01 9 11.01"></polyline>\n          </svg>\n          ' +
+          _0x1d65ef +
+          '\n        '
+        }
+        else {
+          _0x454b9e === 'error' &&
+          (_0x1e3c29.innerHTML =
+          '\n          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n            <circle cx="12" cy="12" r="10"></circle>\n            <line x1="12" y1="8" x2="12" y2="12"></line>\n            <line x1="12" y1="16" x2="12.01" y2="16"></line>\n          </svg>\n          ' +
+          _0x1d65ef +
+          '\n        ')
+        }
+      }
+    }
+    function logMessage(_0x28f374, _0x1bbea7, _0x54c3d7 = 'default') {
+      let _0x1b2ed2
+      if (_0x54c3d7 === 'primary') {
+        _0x1b2ed2 = document.getElementById('paypal-connector-primary-logs')
+      }
+      else {
+        if (_0x54c3d7 === 'completion') {
+          _0x1b2ed2 = document.getElementById('paypal-connector-completion-logs')
+        }
+        else {
+          _0x54c3d7 === 'final'
+          ? (_0x1b2ed2 = document.getElementById('paypal-connector-final-logs'))
+          : (_0x1b2ed2 = document.getElementById('paypal-connector-logs'))
+        }
+      }
+      const _0x34d582 = document.createElement('div')
+      _0x34d582.className = 'paypal-connector-log-entry'
+      const _0x477f59 = document.createElement('span')
+      _0x477f59.className = 'paypal-connector-log-time'
+      _0x477f59.textContent = new Date().toLocaleTimeString()
+      const _0x5cc41b = document.createElement('span')
+      _0x5cc41b.className = 'paypal-connector-log-type ' + _0x28f374
+      _0x5cc41b.textContent =
+      _0x28f374 === 'info'
+      ? 'معلومات'
+      : _0x28f374 === 'success'
+      ? 'نجاح'
+      : 'خطأ'
+      const _0xf50058 = document.createElement('span')
+      _0xf50058.className = 'paypal-connector-log-message'
+      _0xf50058.textContent = _0x1bbea7
+      _0x34d582.appendChild(_0x477f59)
+      _0x34d582.appendChild(_0x5cc41b)
+      _0x34d582.appendChild(_0xf50058)
+      _0x1b2ed2 &&
+      (_0x1b2ed2.appendChild(_0x34d582),
+      (_0x1b2ed2.scrollTop = _0x1b2ed2.scrollHeight))
+      console.log(
+      '[KAG TOOLS PAYPAL] [' + _0x28f374.toUpperCase() + '] ' + _0x1bbea7
+      )
+    }
+    function _0x149a88() {
+      try {
+        var _0x4996f6,
+        _0x5446b3,
+        _0x94df0e,
+        _0x3f1d7b,
+        _0x437663,
+        _0x2c78f8,
+        _0x193fe9,
+        _0x273300,
+        _0x379663,
+        _0x572bc2,
+        _0xce3118,
+        _0x4ec64d
+        if (typeof require !== 'undefined') {
+          try {
+            _0x437663 = require('CurrentUserInitialData').USER_ID
+            _0x3f1d7b = require('DTSGInitialData').token
+            _0x94df0e = require('BusinessUnifiedNavigationContext').businessID
+            try {
+              _0x5446b3 = require('BusinessUnifiedNavigationContext').adAccountID
+            }
+            catch (_0x1ea077) {
+              _0x5446b3 = window.kagToolsPaypalData.accountId
+            }
+            const _0x379d05 = document.querySelector('input[name="lsd"]')
+            if (_0x379d05) {
+              _0x193fe9 = _0x379d05.value
+            }
+            else {
+              const _0x38e7f5 = document.querySelectorAll('script')
+              for (const _0x59a6ef of _0x38e7f5) {
+                const _0x313f06 = _0x59a6ef.textContent.match(
+                /\\"lsd\\":\\"([^\\]+)\\"/
+                )
+                if (_0x313f06 && _0x313f06[1]) {
+                  _0x193fe9 = _0x313f06[1]
+                  break
+                }
+              }
+            }
+            !_0x193fe9 && (_0x193fe9 = _0x3f1d7b)
+            try {
+              _0x273300 = require(['SiteData']).hsi
+              _0x379663 = require(['SiteData'])['__spin_r']
+              _0x572bc2 = require(['SiteData'])['__spin_b']
+              _0xce3118 = require(['SiteData'])['__spin_t']
+              _0x4ec64d = require(['SprinkleConfig']).jazoest
+            }
+            catch (_0x1c5e56) {
+              _0x273300 = '1'
+              _0x379663 = '1007532253'
+              _0x572bc2 = 'trunk'
+              _0xce3118 = '1683882359'
+              _0x4ec64d = '21999'
+            }
+            logMessage('success', 'تم استخراج المعرفات بنجاح')
+            logMessage('info', 'معرف المستخدم: ' + _0x437663)
+            logMessage(
+            'info',
+            'رمز FB_DTSG: ' + _0x3f1d7b.substring(0, 10) + '...'
+            )
+            logMessage('info', 'معرف العمل: ' + _0x94df0e)
+            logMessage('info', 'رمز LSD: ' + _0x193fe9.substring(0, 10) + '...')
+          }
+          catch (_0x8ade62) {
+            logMessage(
+            'error',
+            'فشل استخراج المعرفات باستخدام require: ' + _0x8ade62.message
+            )
+            throw _0x8ade62
+          }
+        }
+        else {
+          const _0x1ff74b = document.documentElement.innerHTML,
+          _0x15c0e7 = _0x1ff74b.match(/"USER_ID":"(\d+)"/)
+          _0x437663 = _0x15c0e7 ? _0x15c0e7[1] : null
+          const _0x572d9e = _0x1ff74b.match(/"token":"([^"]+)"/)
+          _0x3f1d7b = _0x572d9e ? _0x572d9e[1] : null
+          const _0x34bb1b = _0x1ff74b.match(/"businessID":"(\d+)"/)
+          _0x94df0e = _0x34bb1b ? _0x34bb1b[1] : null
+          const _0x3483c7 = document.querySelector('input[name="lsd"]')
+          if (_0x3483c7) {
+            _0x193fe9 = _0x3483c7.value
+          }
+          else {
+            const _0x458203 = _0x1ff74b.match(/"LSD":\["\w+","([^"]+)"/)
+            _0x193fe9 = _0x458203
+            ? _0x458203[1]
+            : _0x3f1d7b || 'AboLnWKTvRm-5NQ:AboLpjHWVrBnGtg'
+          }
+          logMessage('info', 'تم استخراج المعرفات من محتوى الصفحة')
+        }
+        return {
+          token: _0x4996f6 || '',
+          accountId: _0x5446b3 || window.kagToolsPaypalData.accountId,
+          businessID: _0x94df0e || '',
+          fb_dtsg: _0x3f1d7b,
+          userId: _0x437663,
+          uid: _0x2c78f8 || _0x437663,
+          lsd: _0x193fe9,
+          hsi: _0x273300 || '1',
+          spinr: _0x379663 || '1007532253',
+          spinB: _0x572bc2 || 'trunk',
+          spinT: _0xce3118 || '1683882359',
+          jazoest: _0x4ec64d || '21999',
+        }
+      }
+      catch (_0x5898ab) {
+        return (
+        console.error('خطأ في استخراج البيانات:', _0x5898ab),
+        logMessage(
+        'error',
+        'فشل استخراج البيانات اللازمة: ' + _0x5898ab.message
+        ),
+        null
+        )
+      }
+    }
+    async function autoInitConnection() {
+      const _0x446517 = document.getElementById('paypal-connector-auto-init-btn')
+      _0x446517.disabled = true
+      _0x446517.innerHTML =
+      '<div class="paypal-connector-loader"></div>جارِ التهيئة...'
+      updateLinkStatus('pending', 'جارِ تهيئة الاتصال التلقائي...')
+      try {
+        const _0xf8a800 = _0x149a88()
+        if (
+        !_0xf8a800 ||
+        !_0xf8a800.userId ||
+        !_0xf8a800.fb_dtsg ||
+        !_0xf8a800.lsd
+        ) {
+          throw new Error('تعذر استخراج بيانات الاعتماد اللازمة')
+        }
+        window.kagToolsPaypalData.userId = _0xf8a800.userId
+        window.kagToolsPaypalData.fb_dtsg = _0xf8a800.fb_dtsg
+        window.kagToolsPaypalData.businessId = _0xf8a800.businessID
+        window.kagToolsPaypalData.lsd = _0xf8a800.lsd
+        const _0x3f9ac2 = generateUplSessionId(),
+        _0x1214bc = generateFlowSessionId()
+        window.kagToolsPaypalData.flowSessionId = _0x1214bc
+        window.kagToolsPaypalData.uplSessionId = _0x3f9ac2
+        logMessage('info', 'تم استخراج البيانات وتوليد معرفات الجلسة بنجاح')
+        logMessage('info', 'معرف جلسة التدفق: ' + _0x1214bc)
+        logMessage('info', 'معرف جلسة UPL: ' + _0x3f9ac2)
+        updateLinkStatus('pending', 'جارِ التحقق من إمكانية الربط...')
+        const _0x568f3d = window.kagToolsPaypalData.userId,
+        _0x1016e5 = window.kagToolsPaypalData.accountId,
+        _0x36f798 = window.kagToolsPaypalData.fb_dtsg,
+        _0x1c86a1 = window.kagToolsPaypalData.lsd,
+        _0x2d403f = new XMLHttpRequest()
+        _0x2d403f.open('POST', 'https://business.facebook.com/api/graphql/', true)
+        _0x2d403f.setRequestHeader('accept', '*/*')
+        _0x2d403f.setRequestHeader(
+        'content-type',
+        'application/x-www-form-urlencoded'
+        )
+        _0x2d403f.setRequestHeader(
+        'x-fb-friendly-name',
+        'BillingCheckThirdPartyIntegrationStatus'
+        )
+        _0x2d403f.setRequestHeader('x-fb-lsd', _0x1c86a1)
+        const _0xedd2b1 = new URLSearchParams()
+        _0xedd2b1.append('av', _0x568f3d)
+        _0xedd2b1.append('__aaid', _0x1016e5)
+        _0xedd2b1.append('__user', _0x568f3d)
+        _0xedd2b1.append('__a', '1')
+        _0xedd2b1.append('fb_dtsg', _0x36f798)
+        _0xedd2b1.append('__spin_r', _0xf8a800.spinr)
+        _0xedd2b1.append('__spin_b', _0xf8a800.spinB)
+        _0xedd2b1.append('__spin_t', _0xf8a800.spinT)
+        _0xedd2b1.append('__jssesw', '1')
+        _0xedd2b1.append('__hsi', _0xf8a800.hsi)
+        _0xedd2b1.append('__comet_req', '0')
+        _0xedd2b1.append('jazoest', _0xf8a800.jazoest)
+        _0xedd2b1.append('lsd', _0x1c86a1)
+        _0xedd2b1.append(
+        'variables',
+        JSON.stringify({
+          paymentAccountID: _0x1016e5,
+          paymentMethodType: 'NEW_PAYPAL_BA',
+          paymentMethodID: '',
+        }
+        )
+        )
+        _0xedd2b1.append('doc_id', '6975517219196139')
+        logMessage('info', 'إرسال طلب التحقق من إمكانية الربط...')
+        _0x2d403f.onload = function () {
+          if (_0x2d403f.status >= 200 && _0x2d403f.status < 300) {
+            updateLinkStatus('pending', 'جارِ إنشاء رابط PayPal...')
+            const _0x4cbc08 = new XMLHttpRequest()
+            _0x4cbc08.open(
+            'POST',
+            'https://business.facebook.com/api/graphql/',
+            true
+            )
+            _0x4cbc08.setRequestHeader('accept', '*/*')
+            _0x4cbc08.setRequestHeader(
+            'content-type',
+            'application/x-www-form-urlencoded'
+            )
+            _0x4cbc08.setRequestHeader(
+            'x-fb-friendly-name',
+            'BillingThirdPartyAddPayPalInit'
+            )
+            _0x4cbc08.setRequestHeader('x-fb-lsd', _0x1c86a1)
+            const _0xfa9562 = new URLSearchParams()
+            _0xfa9562.append('av', _0x568f3d)
+            _0xfa9562.append('__aaid', _0x1016e5)
+            _0xfa9562.append('__user', _0x568f3d)
+            _0xfa9562.append('__a', '1')
+            _0xfa9562.append('fb_dtsg', _0x36f798)
+            _0xfa9562.append('__spin_r', _0xf8a800.spinr)
+            _0xfa9562.append('__spin_b', _0xf8a800.spinB)
+            _0xfa9562.append('__spin_t', _0xf8a800.spinT)
+            _0xfa9562.append('__jssesw', '1')
+            _0xfa9562.append('__hsi', _0xf8a800.hsi)
+            _0xfa9562.append('__comet_req', '0')
+            _0xfa9562.append('jazoest', _0xf8a800.jazoest)
+            _0xfa9562.append('lsd', _0x1c86a1)
+            _0xfa9562.append(
+            'variables',
+            JSON.stringify({
+              input: {
+                payment_account_id: _0x1016e5,
+                payment_provider: 'PAYPAL',
+                paypal_merchant_group: 86,
+                actor_id: _0x568f3d,
+                client_mutation_id: '7',
+              }
+              ,
+            }
+            )
+            )
+            _0xfa9562.append('doc_id', '6482510055165156')
+            logMessage('info', 'إرسال طلب إنشاء رابط PayPal...')
+            _0x4cbc08.onload = function () {
+              try {
+                const _0x4bbec6 = _0x4cbc08.responseText,
+                _0x12dd81 = JSON.parse(_0x4bbec6.replace(/^for \(;
+                ;
+                \);
+                /, ''))
+                if (
+                _0x12dd81.data &&
+                _0x12dd81.data.billing_paypal_initialization
+                ) {
+                  const _0xb5043 =
+                  _0x12dd81.data.billing_paypal_initialization.redirect_url,
+                  _0x5c4639 =
+                  _0x12dd81.data.billing_paypal_initialization.billing_token,
+                  _0x441de6 =
+                  _0x12dd81.data.billing_paypal_initialization.request_id ||
+                  Date.now() + '-' + Math.floor(Math.random() * 1000000000)
+                  logMessage('success', 'تم إنشاء رابط PayPal بنجاح!')
+                  logMessage('info', 'رمز الجلسة: ' + _0x5c4639)
+                  logMessage('info', 'رابط الربط: ' + _0xb5043)
+                  logMessage('info', 'معرف الطلب: ' + _0x441de6)
+                  window.kagToolsPaypalData.billing_token = _0x5c4639
+                  window.kagToolsPaypalData.redirect_url = _0xb5043
+                  window.kagToolsPaypalData.requestId = _0x441de6
+                  document.getElementById(
+                  'paypal-connector-paypal-data'
+                  ).style.display = 'block'
+                  document.getElementById(
+                  'paypal-connector-token-value'
+                  ).textContent = _0x5c4639 || 'خطأ في الحصول على الرمز'
+                  document.getElementById(
+                  'paypal-connector-redirect-url'
+                  ).textContent = _0xb5043 || 'خطأ في الحصول على الرابط'
+                  document.getElementById(
+                  'paypal-connector-request-id'
+                  ).textContent = _0x441de6
+                  updateLinkStatus(
+                  'success',
+                  'تم إنشاء رابط PayPal بنجاح. انقر على "متابعة إلى PayPal" لإكمال العملية.'
+                  )
+                  const _0x4cf7d5 = document.getElementById(
+                  'paypal-connector-continue-btn'
+                  )
+                  _0x4cf7d5.disabled = false
+                  _0x4cf7d5.innerHTML =
+                  '\n                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                      <path d="M5 12h14"></path>\n                      <path d="M12 5l7 7-7 7"></path>\n                    </svg>\n                    متابعة إلى PayPal\n                  '
+                  _0x446517.disabled = false
+                  _0x446517.innerHTML =
+                  '\n                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n                      <polyline points="22 4 12 14.01 9 11.01"></polyline>\n                    </svg>\n                    تم إنشاء الرابط بنجاح\n                  '
+                  document.getElementById(
+                  'paypal-connector-toggle-manual'
+                  ).style.display = 'inline-block'
+                }
+                else {
+                  _0x12dd81.errors
+                  ? logMessage(
+                  'error',
+                  'أخطاء في استجابة الخادم: ' +
+                  JSON.stringify(_0x12dd81.errors)
+                  )
+                  : logMessage(
+                  'error',
+                  'بيانات الاستجابة غير صالحة: ' + JSON.stringify(_0x12dd81)
+                  )
+                  throw new Error(
+                  'بيانات الاستجابة غير صالحة أو لم يتم العثور على رابط PayPal'
+                  )
+                }
+              }
+              catch (_0x502ed4) {
+                logMessage('error', 'خطأ في تحليل الرد: ' + _0x502ed4.message)
+                updateLinkStatus(
+                'error',
+                'فشل في إنشاء رابط PayPal. يرجى المحاولة مرة أخرى.'
+                )
+                _0x446517.disabled = false
+                _0x446517.innerHTML =
+                '\n                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>\n                  </svg>\n                  إعادة المحاولة\n                '
+                document.getElementById(
+                'paypal-connector-toggle-manual'
+                ).style.display = 'inline-block'
+              }
+            }
+            _0x4cbc08.onerror = function () {
+              logMessage('error', 'فشل الاتصال بالخادم أثناء إنشاء رابط PayPal')
+              updateLinkStatus(
+              'error',
+              'فشل الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.'
+              )
+              _0x446517.disabled = false
+              _0x446517.innerHTML =
+              '\n                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>\n                </svg>\n                إعادة المحاولة\n              '
+              document.getElementById(
+              'paypal-connector-toggle-manual'
+              ).style.display = 'inline-block'
+            }
+            _0x4cbc08.send(_0xfa9562.toString())
+          }
+          else {
+            logMessage('error', 'فشل التحقق من إمكانية الربط: ' + _0x2d403f.status)
+            updateLinkStatus(
+            'error',
+            'فشل التحقق من إمكانية الربط. يرجى المحاولة مرة أخرى.'
+            )
+            _0x446517.disabled = false
+            _0x446517.innerHTML =
+            '\n              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>\n              </svg>\n              إعادة المحاولة\n            '
+            document.getElementById(
+            'paypal-connector-toggle-manual'
+            ).style.display = 'inline-block'
+          }
+        }
+        _0x2d403f.onerror = function () {
+          logMessage('error', 'فشل الاتصال بالخادم أثناء التحقق من إمكانية الربط')
+          updateLinkStatus(
+          'error',
+          'فشل الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.'
+          )
+          _0x446517.disabled = false
+          _0x446517.innerHTML =
+          '\n            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>\n            </svg>\n            إعادة المحاولة\n          '
+          document.getElementById(
+          'paypal-connector-toggle-manual'
+          ).style.display = 'inline-block'
+        }
+        _0x2d403f.send(_0xedd2b1.toString())
+      }
+      catch (_0x531554) {
+        logMessage('error', 'خطأ أثناء تهيئة الاتصال: ' + _0x531554.message)
+        updateLinkStatus('error', 'حدث خطأ أثناء تهيئة الاتصال. يرجى المحاولة مرة أخرى.')
+        _0x446517.disabled = false
+        _0x446517.innerHTML =
+        '\n          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>\n          </svg>\n          إعادة المحاولة\n        '
+        document.getElementById('paypal-connector-toggle-manual').style.display =
+        'inline-block'
+      }
+    }
+    function _0x28b04e() {
+      gotoStep(2)
+      document.getElementById('paypal-connector-logs').style.display = 'block'
+      const _0x524021 = document.getElementById(
+      'paypal-connector-account-id'
+      ).textContent
+      document.getElementById('paypal-connector-account-id-step2').textContent =
+      _0x524021
+      const _0x1718fd = document.getElementById('paypal-connector-continue-btn')
+      _0x1718fd.disabled = true
+      _0x1718fd.innerHTML =
+      '<div class="paypal-connector-loader"></div>جارِ التجهيز...'
+      autoInitConnection()
+    }
+    function handleContinueToPaypal() {
+      if (
+      !window.kagToolsPaypalData ||
+      !window.kagToolsPaypalData.redirect_url
+      ) {
+        logMessage('error', 'لم يتم العثور على رابط PayPal')
+        updateLinkStatus(
+        'error',
+        'لم يتم العثور على رابط PayPal. يرجى المحاولة مرة أخرى.'
+        )
+        return
+      }
+      const _0x3dd3f0 = window.kagToolsPaypalData.redirect_url
+      logMessage('info', 'فتح نافذة PayPal: ' + _0x3dd3f0)
+      const _0x402c60 = window.open(_0x3dd3f0, '_blank', 'width=1000,height=800')
+      if (!_0x402c60) {
+        logMessage(
+        'error',
+        'تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة لهذا الموقع.'
+        )
+        updateLinkStatus(
+        'error',
+        'تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة لهذا الموقع ثم المحاولة مرة أخرى.'
+        )
+        return
+      }
+      updateLinkStatus(
+      'pending',
+      'تم فتح نافذة PayPal. يرجى إكمال عملية الاتصال في النافذة المنبثقة.'
+      )
+      logMessage(
+      'info',
+      'تم فتح نافذة PayPal. بعد إكمال العملية\u060C عد إلى هذه النافذة للمتابعة.'
+      )
+      _0x5f57b3()
+    }
+    async function _0x5f57b3() {
+      if (!window.kagToolsPaypalData.billing_token) {
+        logMessage('error', 'رمز الجلسة غير متوفر')
+        updateLinkStatus('error', 'رمز الجلسة غير متوفر. يرجى المحاولة مرة أخرى.')
+        return
+      }
+      logMessage('info', 'بدء التحقق من حالة الطلب...')
+      let _0x59769e = 0,
+      _0x3b5b06 = false
+      const _0x1c8b67 = setInterval(async () => {
+        _0x59769e++
+        if (_0x59769e > 20 || _0x3b5b06) {
+          clearInterval(_0x1c8b67)
+          if (!_0x3b5b06) {
+            logMessage('error', 'انتهى الوقت أثناء انتظار اكتمال الطلب.')
+            updateLinkStatus(
+            'error',
+            'انتهى الوقت أثناء انتظار اكتمال الطلب. يرجى المحاولة مرة أخرى أو إدخال البيانات يدويًا.'
+            )
+            const _0x27163e = document.getElementById(
+            'paypal-connector-continue-btn'
+            )
+            _0x27163e.disabled = false
+            _0x27163e.innerHTML =
+            '\n              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                <path d="M5 12h14"></path>\n                <path d="M12 5l7 7-7 7"></path>\n              </svg>\n              متابعة يدوية\n            '
+            _0x27163e.removeEventListener('click', handleContinueToPaypal)
+            _0x27163e.addEventListener('click', () => gotoStep(3))
+          }
+          return
+        }
+        try {
+          logMessage(
+          'info',
+          'محاولة التحقق من حالة الطلب (' + _0x59769e + '/' + 20 + ')...'
+          )
+          const _0x27d0a9 = window.kagToolsPaypalData.userId,
+          _0x5b3ef1 = window.kagToolsPaypalData.accountId,
+          _0x58d614 = window.kagToolsPaypalData.fb_dtsg,
+          _0x37a6ce = window.kagToolsPaypalData.lsd,
+          _0x1d14ea = window.kagToolsPaypalData.billing_token,
+          _0x4ffed9 = window.kagToolsPaypalData.flowSessionId,
+          _0x19ed0d = window.kagToolsPaypalData.uplSessionId,
+          _0x2e397d = {
+            accept: '*/*',
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-fb-friendly-name': 'BillingThirdPartyScreenQuery',
+            'x-fb-lsd': _0x37a6ce,
+            'x-bh-flowsessionid': _0x4ffed9,
+            'x-fb-upl-sessionid': _0x19ed0d,
+          }
+          ,
+          _0x4e9f50 = new URLSearchParams({
+            av: _0x27d0a9,
+            __aaid: _0x5b3ef1,
+            __user: _0x27d0a9,
+            __a: '1',
+            fb_dtsg: _0x58d614,
+            jazoest: '25116',
+            lsd: _0x37a6ce,
+            fb_api_caller_class: 'RelayModern',
+            fb_api_req_friendly_name: 'BillingThirdPartyScreenQuery',
+            variables: JSON.stringify({
+              billing_token: _0x1d14ea,
+              eventContext: 'THIRD_PARTY_REQUEST_STATUS_LIVE_QUERY',
+              savingRecurringLPM: false,
+            }
+            ),
+            server_timestamps: 'true',
+            doc_id: '9207223009353582',
+          }
+          ),
+          _0x2b5009 = await fetch(
+          'https://business.facebook.com/api/graphql/',
+          {
+            method: 'POST',
+            headers: _0x2e397d,
+            body: _0x4e9f50,
+            credentials: 'include',
+          }
+          ),
+          _0x1a1e75 = await _0x2b5009.text(),
+          _0x153534 = JSON.parse(_0x1a1e75.replace(/^for \(;
+          ;
+          \);
+          /, ''))
+          if (
+          _0x153534.data &&
+          _0x153534.data.billing_third_party_request_record_from_token
+          ) {
+            const _0x4d934c =
+            _0x153534.data.billing_third_party_request_record_from_token
+            .request_status,
+            _0x262335 =
+            _0x153534.data.billing_third_party_request_record_from_token.id
+            window.kagToolsPaypalData.requestId = _0x262335
+            logMessage('info', 'حالة الطلب: ' + _0x4d934c)
+            if (_0x4d934c === 'SUCCESS') {
+              _0x3b5b06 = true
+              clearInterval(_0x1c8b67)
+              logMessage('success', 'تم إكمال عملية الربط بنجاح!')
+              updateLinkStatus(
+              'success',
+              'تم إكمال عملية الربط بنجاح! جاري الانتقال للخطوة التالية...'
+              )
+              setTimeout(() => {
+                gotoStep(3)
+                saveBillingData()
+              }
+              , 1500)
+            }
+            else {
+              if (_0x4d934c === 'ERROR' || _0x4d934c === 'FAILED') {
+                _0x3b5b06 = true
+                clearInterval(_0x1c8b67)
+                logMessage('error', 'فشلت عملية الربط!')
+                updateLinkStatus(
+                'error',
+                'فشلت عملية الربط! يرجى المحاولة مرة أخرى أو إدخال البيانات يدويًا.'
+                )
+                const _0x6ad878 = document.getElementById(
+                'paypal-connector-continue-btn'
+                )
+                _0x6ad878.disabled = false
+                _0x6ad878.innerHTML =
+                '\n                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                  <path d="M5 12h14"></path>\n                  <path d="M12 5l7 7-7 7"></path>\n                </svg>\n                متابعة يدوية\n              '
+                _0x6ad878.removeEventListener('click', handleContinueToPaypal)
+                _0x6ad878.addEventListener('click', () => gotoStep(3))
+              }
+              else {
+                logMessage(
+                'info',
+                'طلب ربط PayPal قيد المعالجة... (' + _0x4d934c + ')'
+                )
+                updateLinkStatus(
+                'pending',
+                'طلب ربط PayPal قيد المعالجة... (' + _0x4d934c + ')'
+                )
+              }
+            }
+          }
+          else {
+            logMessage('error', 'فشل التحقق من حالة الطلب.')
+          }
+        }
+        catch (_0x2be639) {
+          logMessage(
+          'error',
+          'خطأ أثناء التحقق من حالة الطلب: ' + _0x2be639.message
+          )
+        }
+      }
+      , 3000)
+    }
+    async function saveBillingData() {
+      document.getElementById('paypal-connector-completion-logs').style.display =
+      'block'
+      const _0x25303a = document.getElementById('paypal-connector-save-btn')
+      _0x25303a.disabled = true
+      _0x25303a.innerHTML =
+      '<div class="paypal-connector-loader"></div>جارِ المعالجة...'
+      updateCompletionStatus('pending', 'جارِ إكمال عملية الربط...')
+      try {
+        logMessage('info', 'بدء عملية إكمال ربط PayPal...', 'completion')
+        const _0x2f306e = window.kagToolsPaypalData.userId,
+        _0x31780a = window.kagToolsPaypalData.accountId,
+        _0x242f1f = window.kagToolsPaypalData.fb_dtsg,
+        _0x3f5193 = window.kagToolsPaypalData.lsd,
+        _0x56f903 = window.kagToolsPaypalData.billing_token,
+        _0xb3d7 = window.kagToolsPaypalData.flowSessionId,
+        _0x547721 = window.kagToolsPaypalData.uplSessionId
+        if (!_0x56f903) {
+          throw new Error('رمز الجلسة غير متوفر')
+        }
+        let _0x5e9e96 = null
+        try {
+          logMessage(
+          'info',
+          'محاولة الحصول على معرف طريقة الدفع من استعلام الحالة...',
+          'completion'
+          )
+          const _0x50d315 = await fetch(
+          'https://business.facebook.com/api/graphql/',
+          {
+            method: 'POST',
+            headers: {
+              accept: '*/*',
+              'content-type': 'application/x-www-form-urlencoded',
+              'x-fb-friendly-name': 'BillingThirdPartyScreenQuery',
+              'x-fb-lsd': _0x3f5193,
+              'x-bh-flowsessionid': _0xb3d7,
+              'x-fb-upl-sessionid': _0x547721,
+            }
+            ,
+            body: new URLSearchParams({
+              av: _0x2f306e,
+              __aaid: _0x31780a,
+              __user: _0x2f306e,
+              __a: '1',
+              fb_dtsg: _0x242f1f,
+              jazoest: '25116',
+              lsd: _0x3f5193,
+              fb_api_caller_class: 'RelayModern',
+              fb_api_req_friendly_name: 'BillingThirdPartyScreenQuery',
+              variables: JSON.stringify({
+                billing_token: _0x56f903,
+                eventContext: 'THIRD_PARTY_REQUEST_STATUS_LIVE_QUERY',
+                savingRecurringLPM: false,
+              }
+              ),
+              server_timestamps: 'true',
+              doc_id: '9207223009353582',
+            }
+            ),
+            credentials: 'include',
+          }
+          ),
+          _0x4aced3 = await _0x50d315.text(),
+          _0xe359a8 = JSON.parse(_0x4aced3.replace(/^for \(;
+          ;
+          \);
+          /, ''))
+          if (
+          _0xe359a8.data &&
+          _0xe359a8.data.billing_third_party_request_record_from_token &&
+          _0xe359a8.data.billing_third_party_request_record_from_token
+          .payment_method_id
+          ) {
+            _0x5e9e96 =
+            _0xe359a8.data.billing_third_party_request_record_from_token
+            .payment_method_id
+            logMessage(
+            'success',
+            'تم العثور على معرف طريقة الدفع: ' + _0x5e9e96,
+            'completion'
+            )
+            window.kagToolsPaypalData.paymentMethodId = _0x5e9e96
+            document.getElementById(
+            'paypal-connector-payment-method-id'
+            ).textContent = _0x5e9e96
+            document.getElementById(
+            'paypal-connector-completion-success'
+            ).textContent = 'تم بنجاح'
+            document.getElementById(
+            'paypal-connector-completion-data'
+            ).style.display = 'block'
+            updateCompletionStatus('success', 'تم إكمال عملية الربط بنجاح!')
+            _0x25303a.disabled = false
+            _0x25303a.innerHTML =
+            '\n              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                <path d="M5 12h14"></path>\n                <path d="M12 5l7 7-7 7"></path>\n              </svg>\n              متابعة لتعيين PayPal كأساسي\n            '
+            _0x25303a.removeEventListener('click', saveBillingData)
+            _0x25303a.addEventListener('click', () => {
+              gotoStep(4)
+            }
+            )
+            return
+          }
+        }
+        catch (_0x4a72ce) {
+          logMessage(
+          'error',
+          'خطأ في الحصول على معرف طريقة الدفع من استعلام الحالة: ' +
+          _0x4a72ce.message,
+          'completion'
+          )
+        }
+        logMessage(
+        'info',
+        'محاولة إكمال الربط عن طريق طلب BillingThirdPartyAddPayPalStateSaveMutation...',
+        'completion'
+        )
+        const _0x50a597 = 'https://business.facebook.com/api/graphql/',
+        _0x840252 = {
+          accept: '*/*',
+          'content-type': 'application/x-www-form-urlencoded',
+          'x-fb-friendly-name': 'BillingThirdPartyAddPayPalStateSaveMutation',
+          'x-fb-lsd': _0x3f5193,
+          'x-bh-flowsessionid': _0xb3d7,
+          'x-fb-upl-sessionid': _0x547721,
+        }
+        ,
+        _0x4b0a48 = new URLSearchParams({
+          av: _0x2f306e,
+          __aaid: _0x31780a,
+          __user: _0x2f306e,
+          __a: '1',
+          fb_dtsg: _0x242f1f,
+          jazoest: '25116',
+          lsd: _0x3f5193,
+          fb_api_caller_class: 'RelayModern',
+          fb_api_req_friendly_name:
+          'BillingThirdPartyAddPayPalStateSaveMutation',
+          variables: JSON.stringify({
+            input: {
+              billing_token: _0x56f903,
+              payment_account_id: _0x31780a,
+              upl_logging_data: {
+                context: 'billingaddpm',
+                credential_type: 'NEW_PAYPAL_BA',
+                entry_point: 'BILLING_HUB',
+                external_flow_id: _0x547721,
+                target_name: 'BillingThirdPartyAddPayPalStateSaveMutation',
+                user_session_id: _0x547721,
+                wizard_config_name: 'SELECT_PAYMENT_METHOD',
+                wizard_name: 'ADD_PM',
+                wizard_screen_name: 'third_party_add_paypal_state_display',
+                wizard_session_id: _0xb3d7,
+                wizard_state_name: 'third_party_add_paypal_state_display',
+              }
+              ,
+              actor_id: _0x2f306e,
+              client_mutation_id: '15',
+            }
+            ,
+          }
+          ),
+          server_timestamps: 'true',
+          doc_id: '8289446431115334',
+        }
+        )
+        logMessage('info', 'إرسال طلب إكمال ربط PayPal...', 'completion')
+        const _0x4f3ec8 = await fetch(_0x50a597, {
+          method: 'POST',
+          headers: _0x840252,
+          body: _0x4b0a48,
+          credentials: 'include',
+        }
+        ),
+        _0x43645d = await _0x4f3ec8.text(),
+        _0x9428b2 = JSON.parse(_0x43645d.replace(/^for \(;
+        ;
+        \);
+        /, ''))
+        if (
+        _0x9428b2.data &&
+        _0x9428b2.data.billing_paypal_completion &&
+        _0x9428b2.data.billing_paypal_completion.success
+        ) {
+          const _0x33142a =
+          _0x9428b2.data.billing_paypal_completion.payment_method_id
+          logMessage('success', 'تم إكمال عملية الربط بنجاح!', 'completion')
+          logMessage('info', 'معرف طريقة الدفع: ' + _0x33142a, 'completion')
+          window.kagToolsPaypalData.paymentMethodId = _0x33142a
+          document.getElementById(
+          'paypal-connector-payment-method-id'
+          ).textContent = _0x33142a
+          document.getElementById(
+          'paypal-connector-completion-success'
+          ).textContent = 'تم بنجاح'
+          document.getElementById(
+          'paypal-connector-completion-data'
+          ).style.display = 'block'
+          updateCompletionStatus('success', 'تم إكمال عملية الربط بنجاح!')
+          _0x25303a.disabled = false
+          _0x25303a.innerHTML =
+          '\n<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n              <path d="M5 12h14"></path>\n              <path d="M12 5l7 7-7 7"></path>\n            </svg>\n            متابعة لتعيين PayPal كأساسي\n          '
+          _0x25303a.removeEventListener('click', saveBillingData)
+          _0x25303a.addEventListener('click', () => {
+            gotoStep(4)
+          }
+          )
+        }
+        else {
+          _0x9428b2.errors
+          ? logMessage(
+          'error',
+          'أخطاء في استجابة الخادم: ' + JSON.stringify(_0x9428b2.errors),
+          'completion'
+          )
+          : logMessage(
+          'error',
+          'بيانات الاستجابة غير صالحة: ' + JSON.stringify(_0x9428b2),
+          'completion'
+          )
+          logMessage(
+          'info',
+          'فشل التحقق التلقائي من معرف طريقة الدفع. يمكنك إدخاله يدوياً.',
+          'completion'
+          )
+          const _0x879358 = document.createElement('div')
+          _0x879358.className = 'paypal-connector-manual-input'
+          _0x879358.id = 'paypal-connector-manual-payment-method-input'
+          _0x879358.innerHTML =
+          '\n            <h4>\n              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>\n                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>\n              </svg>\n              إدخال معرف طريقة الدفع يدوياً\n            </h4>\n            <p style="font-size: 12px;
+          margin-bottom: 10px;
+          color: rgba(255, 255, 255, 0.7);
+          ">إذا كنت تعرف معرف طريقة الدفع (Payment Method ID)\u060C يمكنك إدخاله هنا مباشرة والمتابعة.</p>\n            <input type="text" id="paypal-connector-manual-payment-method" placeholder="معرف طريقة الدفع" />\n            <button id="paypal-connector-apply-payment-method" class="paypal-connector-btn paypal-connector-btn-primary" style="width: 100%;
+          margin-top: 10px;
+          ">\n              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>\n                <polyline points="17 21 17 13 7 13 7 21"></polyline>\n                <polyline points="7 3 7 8 15 8"></polyline>\n              </svg>\n              تطبيق معرف طريقة الدفع\n            </button>\n          '
+          const _0x1e58fa = document.getElementById(
+          'paypal-connector-completion-status'
+          )
+          _0x1e58fa.parentNode.insertBefore(_0x879358, _0x1e58fa.nextSibling)
+          document
+          .getElementById('paypal-connector-apply-payment-method')
+          .addEventListener('click', function () {
+            const _0x5d8d6a = document.getElementById(
+            'paypal-connector-manual-payment-method'
+            ),
+            _0xd02299 = _0x5d8d6a.value.trim()
+            if (!_0xd02299) {
+              logMessage('error', 'يجب إدخال معرف طريقة الدفع', 'completion')
+              return
+            }
+            window.kagToolsPaypalData.paymentMethodId = _0xd02299
+            document.getElementById(
+            'paypal-connector-payment-method-id'
+            ).textContent = _0xd02299
+            document.getElementById(
+            'paypal-connector-completion-success'
+            ).textContent = 'تم إدخاله يدوياً'
+            document.getElementById(
+            'paypal-connector-completion-data'
+            ).style.display = 'block'
+            _0x879358.remove()
+            updateCompletionStatus('success', 'تم إدخال معرف طريقة الدفع يدوياً!')
+            _0x25303a.disabled = false
+            _0x25303a.innerHTML =
+            '\n              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n                <path d="M5 12h14"></path>\n                <path d="M12 5l7 7-7 7"></path>\n              </svg>\n              متابعة لتعيين PayPal كأساسي\n            '
+            _0x25303a.removeEventListener('click', saveBillingData)
+            _0x25303a.addEventListener('click', () => {
+              gotoStep(4)
+            }
+            )
+            logMessage(
+            'success',
+            'تم إدخال معرف طريقة الدفع يدوياً: ' + _0xd02299,
+            'completion'
+            )
+          }
+          )
+          throw new Error(
+          'فشل إكمال عملية الربط. يرجى إدخال معرف طريقة الدفع يدوياً.'
+          )
+        }
+      }
+      catch (_0xdf95f) {
+        logMessage(
+        'error',
+        'خطأ أثناء إكمال عملية الربط: ' + _0xdf95f.message,
+        'completion'
+        )
+        updateCompletionStatus(
+        'error',
+        'فشل إكمال عملية الربط. يرجى المحاولة مرة أخرى أو إدخال معرف طريقة الدفع يدوياً.'
+        )
+      }
+    }
+    async function setAsPrimary() {
+      document.getElementById('paypal-connector-primary-logs').style.display =
+      'block'
+      const _0x325f67 = document.getElementById(
+      'paypal-connector-set-primary-btn'
+      )
+      _0x325f67.disabled = true
+      _0x325f67.innerHTML =
+      '<div class="paypal-connector-loader"></div>جارِ التعيين...'
+      _0x686b26('pending', 'جارِ تعيين PayPal كطريقة دفع أساسية...')
+      try {
+        logMessage(
+        'info',
+        'بدء عملية تعيين PayPal كطريقة دفع أساسية...',
+        'primary'
+        )
+        const _0x3d3764 = window.kagToolsPaypalData.userId,
+        _0x13063d = window.kagToolsPaypalData.accountId,
+        _0x58c0f9 = window.kagToolsPaypalData.fb_dtsg,
+        _0x2079ef = window.kagToolsPaypalData.lsd,
+        _0x39922a = window.kagToolsPaypalData.paymentMethodId
+        if (!_0x39922a) {
+          throw new Error('معرف طريقة الدفع غير متوفر')
+        }
+        logMessage('info', 'معرف الحساب: ' + _0x13063d, 'primary')
+        logMessage('info', 'معرف طريقة الدفع: ' + _0x39922a, 'primary')
+        const _0x4a892a = 'https://business.facebook.com/api/graphql/',
+        _0x5daf8c = new URLSearchParams({
+          av: _0x3d3764,
+          __aaid: _0x13063d,
+          __user: _0x3d3764,
+          __a: '1',
+          fb_dtsg: _0x58c0f9,
+          jazoest: '25116',
+          lsd: _0x2079ef,
+          fb_api_caller_class: 'RelayModern',
+          fb_api_req_friendly_name: 'useBillingNextAvailableActionsQuery',
+          variables: JSON.stringify({
+            billable_account_payment_legacy_account_id: _0x13063d,
+            primary_funding_id: _0x39922a,
+            actor_id: _0x3d3764,
+            client_mutation_id: '1',
+          }
+          ),
+          doc_id: '5655324851148937',
+        }
+        )
+        logMessage('info', 'إرسال طلب تعيين طريقة الدفع الأساسية...', 'primary')
+        const _0x1b8a0b = await fetch(_0x4a892a, {
+          method: 'POST',
+          headers: _0x1d5da9,
+          body: _0x5daf8c,
+          credentials: 'include',
+        }
+        ),
+        _0x3a808a = await _0x1b8a0b.text(),
+        _0x5ee65c = JSON.parse(_0x3a808a.replace(/^for \(;
+        ;
+        \);
+        /, ''))
+        if (_0x5ee65c.data) {
+          logMessage(
+          'success',
+          'تم تعيين PayPal كطريقة الدفع الأساسية بنجاح!',
+          'primary'
+          )
+          _0x686b26('success', 'تم تعيين PayPal كطريقة الدفع الأساسية بنجاح!')
+          document.getElementById('paypal-connector-primary-info').style.display =
+          'flex'
+          _0x325f67.disabled = false
+          _0x325f67.innerHTML =
+          '\n            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n              <polyline points="20 6 9 17 4 12"></polyline>\n            </svg>\n            إنهاء\n          '
+          _0x325f67.removeEventListener('click', setAsPrimary)
+          _0x325f67.addEventListener('click', _0x64989d)
+        }
+        else {
+          _0x5ee65c.errors
+          ? logMessage(
+          'error',
+          'أخطاء في استجابة الخادم: ' + JSON.stringify(_0x5ee65c.errors),
+          'primary'
+          )
+          : logMessage(
+          'error',
+          'بيانات الاستجابة غير صالحة: ' + JSON.stringify(_0x5ee65c),
+          'primary'
+          )
+          throw new Error('فشل تعيين PayPal كطريقة دفع أساسية')
+        }
+      }
+      catch (_0x37b2b5) {
+        logMessage(
+        'error',
+        'خطأ أثناء تعيين طريقة الدفع الأساسية: ' + _0x37b2b5.message,
+        'primary'
+        )
+        _0x686b26(
+        'error',
+        'فشل تعيين PayPal كطريقة دفع أساسية. يرجى المحاولة مرة أخرى.'
+        )
+        _0x325f67.disabled = false
+        _0x325f67.innerHTML =
+        '\n          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>\n            <polyline points="22 4 12 14.01 9 11.01"></polyline>\n          </svg>\n          تعيين كأساسي\n        '
+      }
+    }
+    function _0x64989d() {
+      gotoStep(5)
+      document.getElementById('paypal-connector-final-logs').style.display =
+      'block'
+      document.getElementById('paypal-connector-account-id-final').textContent =
+      window.kagToolsPaypalData.accountId
+      document.getElementById(
+      'paypal-connector-credential-id-final'
+      ).textContent = window.kagToolsPaypalData.paymentMethodId
+      document.getElementById('paypal-connector-completion-time').textContent =
+      new Date().toLocaleString()
+      logMessage('success', 'اكتملت العملية بنجاح!', 'final')
+      logMessage(
+      'info',
+      'تم ربط وتعيين PayPal كطريقة دفع أساسية للحساب ' +
+      window.kagToolsPaypalData.accountId,
+      'final'
+      )
+      logMessage('info', 'يمكنك تحديث الصفحة لرؤية التغييرات', 'final')
+    }
+  }
+  )()
+}
+)();
