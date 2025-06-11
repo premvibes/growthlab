@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Rewards</title>
+    <script defer src="../ga.js"></script>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <style>
+        .center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-block: 10px;
+        }
+
+        .whatsapp-share {
+            margin: 20px 0;
+        }
+
+        .reward-link {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            pointer-events: none;
+            opacity: 0.5;
+            margin-top: 20px;
+        }
+
+        .reward-link.active {
+            pointer-events: auto;
+            opacity: 1;
+        }
+
+        .reward-link:hover:not(.disabled) {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+<div class="intro-box" style="display: flex; align-items: center; flex-direction: column;">
+    <h1> 🎉 Congratulations!</h1>
+    <div style="padding-top: 10px;">
+        <h3>You’ve successfully completed the quiz, and we’re impressed by your skills! Every question you answered
+            brought you one step closer, and now it’s time to enjoy your well-earned reward.
+        </h3>
+        <h3>
+            Learning and challenging yourself is always worth it, and today you’ve proven that! Whether it was a
+            tricky sum or a quick calculation, you powered through like a pro. Your exclusive reward link is just one click away.
+        </h3>
+    </div>
+    <!--    <div class="cf-turnstile" data-sitekey="0x4AAAAAABCk7npQatXQdvWX" data-callback="enableLink"></div>-->
+    <a id="rewardLink" class="reward-link">Getting Link...</a>
+</div>
+
+<footer>
+    <nav class="footer-nav">
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About Us</a>
+        <a href="../contact.html">Contact US</a>
+        <a href="../privacy.html">Privacy Policy</a>
+        <a href="../terms.html">Terms & Conditions</a>
+    </nav>
+    <p>© 2025 Math Quiz. All Rights Reserved.</p>
+</footer>
+
+<script src="../withdraw.js"></script>
+</body>
+</html>

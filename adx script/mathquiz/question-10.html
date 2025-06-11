@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quiz</title>
+    <link rel="stylesheet" href="../style.css">
+    <script defer src="../ga.js"></script>
+</head>
+<body style="overflow: hidden">
+<div class="container">
+    <div id="p-overlay"></div>
+    <div id="p">
+        <div class="p-content">
+            <div onclick="toggleP()" class="close-btn" id="close">×</div>
+            <h2>You're Doing Great!</h2>
+            <p class="center">
+                You're already halfway there. That’s a big win!
+            </p>
+            <p class="center">
+                Just a few more easy questions and you’ll be all done.
+            </p>
+            <p class="center">
+                Keep going — you’ve got this!
+            </p>
+        </div>
+    </div>
+    <div class="ad-container">
+        <p>Advertisement</p>
+        <div id="gpt-passback">
+
+        </div>
+    </div>
+    <div id="counter-wrapper">
+
+    </div>
+    <div class="quiz-box">
+        <div class="quiz-container">
+
+            <div class="header">
+                <h3>✅ Choose the correct answer and claim your reward!</h3>
+            </div>
+            <div id="question"></div>
+            <div id="options"></div>
+            <div id="results"></div>
+
+            <div class="ad-container">
+                <p>Advertisement</p>
+                <div id="gpt-passback-2">
+
+                </div>
+            </div>
+
+            <button id="next-page-btn" class="progress-button" disabled>
+                <span class="button-text">Next</span>
+                <span class="progress-fill"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Intro Section for Quiz Benefits -->
+    <div class="intro-box">
+    </div>
+
+</div>
+<footer>
+    <nav class="footer-nav">
+        <a href="../about.html">About Us</a>
+        <a href="../contact.html">Contact US</a>
+        <a href="../privacy.html">Privacy Policy</a>
+        <a href="../terms.html">Terms & Conditions</a>
+    </nav>
+    <p>© 2025 Math Quiz. All Rights Reserved.</p>
+</footer>
+<script src="../main.js"></script>
+<script src="../okay.js"></script>
+<script src="../script.js"></script>
+<script src="../content.js"></script>
+<script>
+    const p = document.getElementById("p");
+    const overlay = document.getElementById("p-overlay");
+    const close = document.getElementById("close");
+
+    function toggleP() {
+        p.style.display = "none";
+        overlay.style.display = "none";
+        document.body.style.overflow = "";
+    }
+</script>
+</body>
+
+</html>
